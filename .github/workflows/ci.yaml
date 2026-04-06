@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [js, native, wasm-gc]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install MoonBit CLI
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - name: Moon update
+        run: moon update
+      - name: Moon check
+        run: moon check --deny-warn --target ${{ matrix.target }}
+      - name: Moon test
+        run: moon test --target ${{ matrix.target }}
