@@ -84,6 +84,12 @@ fn main {
       ),
     ],
   )
+  // --schema flag: output structured JSON and exit
+  let args = @env.args()
+  if args.length() > 0 && args[args.length() - 1] == "--schema" {
+    println(app.render_schema())
+    return
+  }
   try {
     app.run()
   } catch {
