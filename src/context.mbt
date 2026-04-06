@@ -23,30 +23,36 @@ pub fn Context::get_string_required(self : Context, name : String) -> String rai
 pub fn Context::get_int(self : Context, name : String) -> Int? {
   match self.get_string(name) {
     Some(s) => {
-      let mut result = 0
-      let mut negative = false
       let chars = s.to_array()
       if chars.length() == 0 {
         return None
       }
       let mut i = 0
-      if chars[0] == '-' {
-        negative = true
+      let negative = chars[0] == '-'
+      if negative {
         i = 1
       }
-      if i >= chars.length() {
+      let digits = chars.length() - i
+      if digits == 0 || digits > 18 {
         return None
       }
+      let mut result : Int64 = 0L
       while i < chars.length() {
         let c = chars[i]
         if c >= '0' && c <= '9' {
-          result = result * 10 + (c.to_int() - '0'.to_int())
+          result = result * 10L + (c.to_int() - '0'.to_int()).to_int64()
         } else {
           return None
         }
         i = i + 1
       }
-      Some(if negative { -result } else { result })
+      if negative {
+        result = -result
+      }
+      if result < (-2147483648).to_int64() || result > 2147483647L {
+        return None
+      }
+      Some(result.to_int())
     }
     None => None
   }

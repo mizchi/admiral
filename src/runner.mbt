@@ -1,5 +1,4 @@
 ///|
-///|
 pub fn positional(
   name : String,
   description~ : String = "",
@@ -62,7 +61,10 @@ fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
           } else {
             match cmd.run {
               Some(run_fn) => run_fn(sub_ctx)
-              None => fail("command '" + name + "' has no run handler")
+              None => {
+                let subs = cmd.subcommands.map(fn(c) { c.name }).join(", ")
+                fail("missing subcommand for '" + name + "'. Available: " + subs)
+              }
             }
           }
         None => fail("unknown command: " + name)
