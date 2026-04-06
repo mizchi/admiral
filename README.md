@@ -34,7 +34,7 @@ fn main {
           @admiral.int("count", short=Some('c'), description="Repeat count", default=Some(1)),
         ],
         run=Some(fn(ctx) {
-          let name = try { ctx.get_string_required!("name") } catch { _ => return }
+          let name = try { ctx.get_string_required("name") } catch { _ => return }
           let verbose = ctx.get_bool("verbose")
           let count = match ctx.get_int("count") { Some(n) => n; None => 1 }
           for i = 0; i < count; i = i + 1 {
@@ -48,7 +48,7 @@ fn main {
       ),
     ],
   )
-  try { app.run!(@env.args()) } catch { err => println(err) }
+  try { app.run() } catch { err => println(err) }
 }
 ```
 
@@ -76,6 +76,16 @@ let app = @admiral.cli(
     ),
   ],
 )
+```
+
+### Explicit argv
+
+```moonbit
+// Pass argv explicitly (useful for testing)
+app.run(argv=Some(["greet", "--name", "alice"]))
+
+// No argument uses process args (default for CLI apps)
+app.run()
 ```
 
 ## API
@@ -106,7 +116,7 @@ let app = @admiral.cli(
 ### Running
 
 ```moonbit
-app.run!(argv)  // raises on parse error or missing command
+app.run()  // uses process args, raises on parse error or missing command
 ```
 
 `--help` and `--version` are automatically handled by argparse.
