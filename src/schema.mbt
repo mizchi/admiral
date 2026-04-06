@@ -13,9 +13,8 @@ fn option_def_to_json(opt : OptionDef) -> Json {
   m["type"] = option_type_to_string(opt.type_).to_json()
   m["description"] = opt.description.to_json()
   m["required"] = opt.required.to_json()
-  match opt.short {
-    Some(c) => m["short"] = c.to_string().to_json()
-    None => ()
+  if opt.short != no_short {
+    m["short"] = opt.short.to_string().to_json()
   }
   match opt.default_value {
     Some(v) => m["default"] = v.to_json()

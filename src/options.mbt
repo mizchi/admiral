@@ -1,7 +1,10 @@
+///| sentinel value for "no short flag"
+let no_short : Char = '\u0000'
+
 ///|
 pub fn string(
   name : String,
-  short~ : Char? = None,
+  short~ : Char = '\u0000',
   description~ : String = "",
   required~ : Bool = false,
   default~ : String? = None
@@ -22,7 +25,7 @@ pub fn string(
 ///|
 pub fn bool(
   name : String,
-  short~ : Char? = None,
+  short~ : Char = '\u0000',
   description~ : String = ""
 ) -> OptionDef {
   {
@@ -38,7 +41,7 @@ pub fn bool(
 ///|
 pub fn int(
   name : String,
-  short~ : Char? = None,
+  short~ : Char = '\u0000',
   description~ : String = "",
   required~ : Bool = false,
   default~ : Int? = None

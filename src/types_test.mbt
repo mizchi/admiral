@@ -2,7 +2,7 @@ test "OptionDef holds string option metadata" {
   let opt : @admiral.OptionDef = {
     name: "output",
     type_: @admiral.StringOpt,
-    short: Some('o'),
+    short: 'o',
     description: "Output path",
     required: true,
     default_value: None,

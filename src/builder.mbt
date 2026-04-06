@@ -1,31 +1,37 @@
 ///|
+fn has_short(opt : OptionDef) -> Bool {
+  opt.short != no_short
+}
+
+///|
 fn build_option_to_flag(opt : OptionDef) -> @argparse.FlagArg {
-  match opt.short {
-    Some(c) => @argparse.FlagArg(opt.name, short=c, about=opt.description)
-    None => @argparse.FlagArg(opt.name, about=opt.description)
+  if has_short(opt) {
+    @argparse.FlagArg(opt.name, short=opt.short, about=opt.description)
+  } else {
+    @argparse.FlagArg(opt.name, about=opt.description)
   }
 }
 
 ///|
 fn build_option_to_option_arg(opt : OptionDef) -> @argparse.OptionArg {
-  match (opt.short, opt.default_value, opt.required) {
-    (Some(c), Some(dv), _) =>
+  match (has_short(opt), opt.default_value, opt.required) {
+    (true, Some(dv), _) =>
       @argparse.OptionArg(
-        opt.name, short=c, about=opt.description, default_values=[dv],
+        opt.name, short=opt.short, about=opt.description, default_values=[dv],
       )
-    (Some(c), None, true) =>
+    (true, None, true) =>
       @argparse.OptionArg(
-        opt.name, short=c, about=opt.description, required=true,
+        opt.name, short=opt.short, about=opt.description, required=true,
       )
-    (Some(c), None, false) =>
-      @argparse.OptionArg(opt.name, short=c, about=opt.description)
-    (None, Some(dv), _) =>
+    (true, None, false) =>
+      @argparse.OptionArg(opt.name, short=opt.short, about=opt.description)
+    (false, Some(dv), _) =>
       @argparse.OptionArg(
         opt.name, about=opt.description, default_values=[dv],
       )
-    (None, None, true) =>
+    (false, None, true) =>
       @argparse.OptionArg(opt.name, about=opt.description, required=true)
-    (None, None, false) =>
+    (false, None, false) =>
       @argparse.OptionArg(opt.name, about=opt.description)
   }
 }

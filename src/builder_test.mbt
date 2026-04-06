@@ -3,9 +3,9 @@ test "build_command converts simple command" {
     name: "greet",
     description: "Greet someone",
     options: [
-      string("name", short=Some('n'), description="Name to greet", required=true),
-      bool("verbose", short=Some('v'), description="Verbose output"),
-      int("count", short=Some('c'), description="Repeat count", default=Some(1)),
+      string("name", short='n', description="Name to greet", required=true),
+      bool("verbose", short='v', description="Verbose output"),
+      int("count", short='c', description="Repeat count", default=Some(1)),
     ],
     positionals: [],
     examples: [],
@@ -24,7 +24,7 @@ test "build_command converts nested subcommands" {
   let sub : CommandDef = {
     name: "serve",
     description: "Start server",
-    options: [int("port", short=Some('p'), description="Port")],
+    options: [int("port", short='p', description="Port")],
     positionals: [],
     examples: [],
     subcommands: [],

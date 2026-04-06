@@ -8,9 +8,9 @@ fn main {
         name="greet",
         description="Greet someone",
         options=[
-          @admiral.string("name", short=Some('n'), description="Name to greet", required=true),
-          @admiral.bool("loud", short=Some('l'), description="Shout the greeting"),
-          @admiral.int("count", short=Some('c'), description="Repeat count", default=Some(1)),
+          @admiral.string("name", short='n', description="Name to greet", required=true),
+          @admiral.bool("loud", short='l', description="Shout the greeting"),
+          @admiral.int("count", short='c', description="Repeat count", default=Some(1)),
         ],
         examples=[
           "myapp greet --name Alice",
@@ -43,7 +43,7 @@ fn main {
                 description="Apply pending migrations",
                 options=[
                   @admiral.bool("dry-run", description="Preview without applying"),
-                  @admiral.int("steps", short=Some('s'), description="Number of migrations to apply"),
+                  @admiral.int("steps", short='s', description="Number of migrations to apply"),
                 ],
                 examples=[
                   "myapp db migrate up",
@@ -68,7 +68,7 @@ fn main {
                 name="down",
                 description="Rollback migrations",
                 options=[
-                  @admiral.int("steps", short=Some('s'), description="Number of migrations to rollback", default=Some(1)),
+                  @admiral.int("steps", short='s', description="Number of migrations to rollback", default=Some(1)),
                 ],
                 run=Some(fn(ctx) {
                   let steps = match ctx.get_int("steps") { Some(n) => n; None => 1 }
@@ -82,7 +82,7 @@ fn main {
             name="seed",
             description="Seed the database",
             options=[
-              @admiral.string("file", short=Some('f'), description="Seed file path", default=Some("seeds/default.sql")),
+              @admiral.string("file", short='f', description="Seed file path", default=Some("seeds/default.sql")),
             ],
             run=Some(fn(ctx) {
               let file = match ctx.get_string("file") { Some(f) => f; None => "seeds/default.sql" }

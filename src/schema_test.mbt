@@ -8,8 +8,8 @@ test "render_schema outputs JSON for simple command" {
         name="greet",
         description="Greet someone",
         options=[
-          string("name", short=Some('n'), description="Name to greet", required=true),
-          bool("verbose", short=Some('v'), description="Verbose output"),
+          string("name", short='n', description="Name to greet", required=true),
+          bool("verbose", short='v', description="Verbose output"),
           int("count", description="Repeat count", default=Some(3)),
         ],
       ),

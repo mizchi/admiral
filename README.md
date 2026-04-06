@@ -2,7 +2,7 @@
 
 Declarative CLI builder for MoonBit, inspired by [gunshi](https://github.com/kazupon/gunshi).
 
-A thin wrapper around `moonbitlang/core/argparse` that provides typed option helpers and a gunshi-like command definition API.
+A thin wrapper around `moonbitlang/core/argparse` that provides typed option helpers, structured schema output for AI agents, and a gunshi-like command definition API.
 
 ## Install
 
@@ -29,10 +29,11 @@ fn main {
         name="greet",
         description="Greet someone",
         options=[
-          @admiral.string("name", short=Some('n'), description="Name", required=true),
-          @admiral.bool("verbose", short=Some('v'), description="Verbose output"),
-          @admiral.int("count", short=Some('c'), description="Repeat count", default=Some(1)),
+          @admiral.string("name", short='n', description="Name", required=true),
+          @admiral.bool("verbose", short='v', description="Verbose output"),
+          @admiral.int("count", short='c', description="Repeat count", default=Some(1)),
         ],
+        examples=["myapp greet --name Alice", "myapp greet --name Bob --verbose"],
         run=Some(fn(ctx) {
           let name = try { ctx.get_string_required("name") } catch { _ => return }
           let verbose = ctx.get_bool("verbose")
@@ -66,6 +67,7 @@ let app = @admiral.cli(
           name="up",
           description="Run pending migrations",
           options=[@admiral.bool("dry-run", description="Preview only")],
+          examples=["db migrate up", "db migrate up --dry-run"],
           run=Some(fn(ctx) {
             if ctx.get_bool("dry-run") {
               println("Dry run mode")
@@ -77,6 +79,55 @@ let app = @admiral.cli(
   ],
 )
 ```
+
+### Positional Arguments
+
+```moonbit
+@admiral.command(
+  name="compile",
+  description="Compile source files",
+  positionals=[
+    @admiral.positional("input", description="Input file", required=true),
+    @admiral.positional("output", description="Output file"),
+  ],
+  run=Some(fn(ctx) {
+    let files = ctx.get_strings("input")
+    // ...
+  }),
+)
+```
+
+### Structured Schema (for AI agents)
+
+```moonbit
+// Output CLI definition as JSON
+println(app.render_schema())
+
+// Or as Json value
+let json = app.render_schema_json()
+```
+
+Output:
+
+```json
+{
+  "name": "myapp",
+  "version": "1.0.0",
+  "commands": {
+    "greet": {
+      "description": "Greet someone",
+      "options": {
+        "name": { "type": "string", "required": true, "short": "n", "description": "Name" },
+        "verbose": { "type": "bool", "required": false, "short": "v" },
+        "count": { "type": "int", "required": false, "short": "c", "default": "1" }
+      },
+      "examples": ["myapp greet --name Alice"]
+    }
+  }
+}
+```
+
+This enables AI agents to programmatically understand CLI tool interfaces without parsing `--help` text.
 
 ### Explicit argv
 
@@ -95,10 +146,11 @@ app.run()
 - `string(name, short?, description?, required?, default?)` — String option (`--name value`)
 - `bool(name, short?, description?)` — Boolean flag (`--verbose`)
 - `int(name, short?, description?, required?, default?)` — Integer option (`--port 8080`)
+- `positional(name, description?, required?)` — Positional argument
 
 ### Command Definition
 
-- `command(name, description?, options?, subcommands?, run?)` — Define a command or subcommand
+- `command(name, description?, options?, positionals?, examples?, subcommands?, run?)` — Define a command
 - `cli(name, version?, description?, options?, commands?)` — Create a CLI app
 
 ### Context Methods
@@ -112,6 +164,11 @@ app.run()
 | `get_int_required(name)` | `Int raise` | Parsed integer, raises if missing/invalid |
 | `get_strings(name)` | `Array[String]` | All values for an option |
 | `get_subcommand()` | `(String, Context)?` | Selected subcommand name and context |
+
+### Schema Output
+
+- `app.render_schema() -> String` — JSON string of full CLI definition
+- `app.render_schema_json() -> Json` — Same as `Json` value
 
 ### Running
 

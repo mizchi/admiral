@@ -9,7 +9,7 @@ test "cli creates CliApp and run executes command" {
       command(
         name="greet",
         description="Greet someone",
-        options=[string("name", short=Some('n'), description="Name", required=true)],
+        options=[string("name", short='n', description="Name", required=true)],
         run=Some(fn(ctx) {
           called.val = true
           captured_name.val = try {
@@ -36,7 +36,7 @@ test "cli run with bool flag" {
       command(
         name="build",
         description="Build project",
-        options=[bool("verbose", short=Some('v'), description="Verbose")],
+        options=[bool("verbose", short='v', description="Verbose")],
         run=Some(fn(ctx) { was_verbose.val = ctx.get_bool("verbose") }),
       ),
     ],
@@ -55,7 +55,7 @@ test "cli run with int option" {
       command(
         name="serve",
         description="Start server",
-        options=[int("port", short=Some('p'), description="Port", default=Some(3000))],
+        options=[int("port", short='p', description="Port", default=Some(3000))],
         run=Some(fn(ctx) {
           port_val.val = match ctx.get_int("port") {
             Some(p) => p
