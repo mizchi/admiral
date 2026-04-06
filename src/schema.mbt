@@ -13,6 +13,9 @@ fn option_def_to_json(opt : OptionDef) -> Json {
   m["type"] = option_type_to_string(opt.type_).to_json()
   m["description"] = opt.description.to_json()
   m["required"] = opt.required.to_json()
+  if opt.type_ == BoolOpt {
+    m["style"] = "flag".to_json()
+  }
   if opt.short != no_short {
     m["short"] = opt.short.to_string().to_json()
   }
@@ -32,7 +35,18 @@ fn positional_def_to_json(pos : PositionalDef) -> Json {
 }
 
 ///|
-fn command_def_to_json(cmd : CommandDef) -> Json {
+fn generate_example(cmd_path : String, options : Array[OptionDef]) -> String {
+  let parts : Array[String] = [cmd_path]
+  for opt in options {
+    if opt.required {
+      parts.push("--" + opt.name + " <" + opt.name + ">")
+    }
+  }
+  parts.join(" ")
+}
+
+///|
+fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
   let m : Map[String, Json] = {}
   m["description"] = cmd.description.to_json()
   if cmd.options.length() > 0 {
@@ -51,11 +65,15 @@ fn command_def_to_json(cmd : CommandDef) -> Json {
   }
   if cmd.examples.length() > 0 {
     m["examples"] = Json::array(cmd.examples.map(fn(e) { e.to_json() }))
+  } else if cmd.options.length() > 0 || cmd.positionals.length() > 0 {
+    let ex = generate_example(cmd_path, cmd.options)
+    m["examples"] = Json::array([ex.to_json()])
   }
   if cmd.subcommands.length() > 0 {
     let subs : Map[String, Json] = {}
     for sub in cmd.subcommands {
-      subs[sub.name] = command_def_to_json(sub)
+      let sub_path = cmd_path + " " + sub.name
+      subs[sub.name] = command_def_to_json(sub, sub_path)
     }
     m["commands"] = Json::object(subs)
   }
@@ -78,7 +96,8 @@ pub fn CliApp::render_schema_json(self : CliApp) -> Json {
   if self.commands.length() > 0 {
     let cmds : Map[String, Json] = {}
     for cmd in self.commands {
-      cmds[cmd.name] = command_def_to_json(cmd)
+      let cmd_path = self.name + " " + cmd.name
+      cmds[cmd.name] = command_def_to_json(cmd, cmd_path)
     }
     m["commands"] = Json::object(cmds)
   }
