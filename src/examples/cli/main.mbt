@@ -12,6 +12,10 @@ fn main {
           @admiral.bool("loud", short=Some('l'), description="Shout the greeting"),
           @admiral.int("count", short=Some('c'), description="Repeat count", default=Some(1)),
         ],
+        examples=[
+          "myapp greet --name Alice",
+          "myapp greet --name Bob --loud --count 3",
+        ],
         run=Some(fn(ctx) {
           let name = try { ctx.get_string_required("name") } catch { _ => return }
           let loud = ctx.get_bool("loud")
@@ -40,6 +44,11 @@ fn main {
                 options=[
                   @admiral.bool("dry-run", description="Preview without applying"),
                   @admiral.int("steps", short=Some('s'), description="Number of migrations to apply"),
+                ],
+                examples=[
+                  "myapp db migrate up",
+                  "myapp db migrate up --dry-run",
+                  "myapp db migrate up --steps 5",
                 ],
                 run=Some(fn(ctx) {
                   let dry = ctx.get_bool("dry-run")

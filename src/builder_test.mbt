@@ -7,6 +7,8 @@ test "build_command converts simple command" {
       bool("verbose", short=Some('v'), description="Verbose output"),
       int("count", short=Some('c'), description="Repeat count", default=Some(1)),
     ],
+    positionals: [],
+    examples: [],
     subcommands: [],
     run: Some(fn(_ctx) { () }),
   }
@@ -23,6 +25,8 @@ test "build_command converts nested subcommands" {
     name: "serve",
     description: "Start server",
     options: [int("port", short=Some('p'), description="Port")],
+    positionals: [],
+    examples: [],
     subcommands: [],
     run: Some(fn(_ctx) { () }),
   }
@@ -30,6 +34,8 @@ test "build_command converts nested subcommands" {
     name: "app",
     description: "My app",
     options: [],
+    positionals: [],
+    examples: [],
     subcommands: [sub],
     run: None,
   }

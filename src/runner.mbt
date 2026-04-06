@@ -1,12 +1,24 @@
 ///|
+///|
+pub fn positional(
+  name : String,
+  description~ : String = "",
+  required~ : Bool = false
+) -> PositionalDef {
+  { name, description, required }
+}
+
+///|
 pub fn command(
   name~ : String,
   description~ : String = "",
   options~ : Array[OptionDef] = [],
+  positionals~ : Array[PositionalDef] = [],
+  examples~ : Array[String] = [],
   subcommands~ : Array[CommandDef] = [],
   run~ : ((Context) -> Unit)? = None
 ) -> CommandDef {
-  { name, description, options, subcommands, run }
+  { name, description, options, positionals, examples, subcommands, run }
 }
 
 ///|

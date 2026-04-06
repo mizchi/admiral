@@ -25,6 +25,14 @@ fn option_def_to_json(opt : OptionDef) -> Json {
 }
 
 ///|
+fn positional_def_to_json(pos : PositionalDef) -> Json {
+  let m : Map[String, Json] = {}
+  m["description"] = pos.description.to_json()
+  m["required"] = pos.required.to_json()
+  Json::object(m)
+}
+
+///|
 fn command_def_to_json(cmd : CommandDef) -> Json {
   let m : Map[String, Json] = {}
   m["description"] = cmd.description.to_json()
@@ -34,6 +42,16 @@ fn command_def_to_json(cmd : CommandDef) -> Json {
       opts[opt.name] = option_def_to_json(opt)
     }
     m["options"] = Json::object(opts)
+  }
+  if cmd.positionals.length() > 0 {
+    let poss : Map[String, Json] = {}
+    for pos in cmd.positionals {
+      poss[pos.name] = positional_def_to_json(pos)
+    }
+    m["positionals"] = Json::object(poss)
+  }
+  if cmd.examples.length() > 0 {
+    m["examples"] = Json::array(cmd.examples.map(fn(e) { e.to_json() }))
   }
   if cmd.subcommands.length() > 0 {
     let subs : Map[String, Json] = {}

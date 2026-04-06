@@ -16,10 +16,19 @@ pub(all) struct OptionDef {
 } derive(Show)
 
 ///|
+pub(all) struct PositionalDef {
+  name : String
+  description : String
+  required : Bool
+}
+
+///|
 pub(all) struct CommandDef {
   name : String
   description : String
   options : Array[OptionDef]
+  positionals : Array[PositionalDef]
+  examples : Array[String]
   subcommands : Array[CommandDef]
   run : ((Context) -> Unit)?
 }

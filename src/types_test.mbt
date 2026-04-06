@@ -17,6 +17,8 @@ test "CommandDef holds subcommands" {
     name: "sub",
     description: "A subcommand",
     options: [],
+    positionals: [],
+    examples: [],
     subcommands: [],
     run: Some(fn(_ctx) { () }),
   }
@@ -24,6 +26,8 @@ test "CommandDef holds subcommands" {
     name: "app",
     description: "An app",
     options: [],
+    positionals: [],
+    examples: [],
     subcommands: [sub],
     run: None,
   }

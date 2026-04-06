@@ -31,6 +31,23 @@ fn build_option_to_option_arg(opt : OptionDef) -> @argparse.OptionArg {
 }
 
 ///|
+fn build_positional(pos : PositionalDef) -> @argparse.PositionArg {
+  if pos.required {
+    @argparse.PositionArg(
+      pos.name,
+      about=pos.description,
+      num_args=@argparse.ValueRange(lower=1),
+    )
+  } else {
+    @argparse.PositionArg(
+      pos.name,
+      about=pos.description,
+      num_args=@argparse.ValueRange(lower=0),
+    )
+  }
+}
+
+///|
 pub fn build_command(cmd : CommandDef) -> @argparse.Command {
   let flags : Array[@argparse.FlagArg] = []
   let options : Array[@argparse.OptionArg] = []
@@ -40,12 +57,14 @@ pub fn build_command(cmd : CommandDef) -> @argparse.Command {
       StringOpt | IntOpt => options.push(build_option_to_option_arg(opt))
     }
   }
+  let positionals = cmd.positionals.map(fn(p) { build_positional(p) })
   let subcommands = cmd.subcommands.map(fn(sub) { build_command(sub) })
   @argparse.Command(
     cmd.name,
     about=cmd.description,
     flags=flags,
     options=options,
+    positionals=positionals,
     subcommands=subcommands,
   )
 }
