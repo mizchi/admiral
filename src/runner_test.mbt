@@ -21,7 +21,7 @@ test "cli creates CliApp and run executes command" {
       ),
     ],
   )
-  app.run(["greet", "--name", "alice"])
+  app.run(argv=Some(["greet", "--name", "alice"]))
   inspect(called.val, content="true")
   inspect(captured_name.val, content="alice")
 }
@@ -41,7 +41,7 @@ test "cli run with bool flag" {
       ),
     ],
   )
-  app.run(["build", "--verbose"])
+  app.run(argv=Some(["build", "--verbose"]))
   inspect(was_verbose.val, content="true")
 }
 
@@ -65,7 +65,7 @@ test "cli run with int option" {
       ),
     ],
   )
-  app.run(["serve", "--port", "8080"])
+  app.run(argv=Some(["serve", "--port", "8080"]))
   inspect(port_val.val, content="8080")
 }
 
@@ -92,6 +92,6 @@ test "cli run with nested subcommand" {
       ),
     ],
   )
-  app.run(["db", "migrate", "--dry-run"])
+  app.run(argv=Some(["db", "migrate", "--dry-run"]))
   inspect(result.val, content="dry")
 }

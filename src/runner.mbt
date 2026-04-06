@@ -60,7 +60,10 @@ fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
 }
 
 ///|
-pub fn CliApp::run(self : CliApp, argv : Array[String]) -> Unit raise {
+pub fn CliApp::run(
+  self : CliApp,
+  argv~ : Array[String]? = None
+) -> Unit raise {
   let flags : Array[@argparse.FlagArg] = []
   let options : Array[@argparse.OptionArg] = []
   for opt in self.root_options {
@@ -78,7 +81,10 @@ pub fn CliApp::run(self : CliApp, argv : Array[String]) -> Unit raise {
     options=options,
     subcommands=subcommands,
   )
-  let matches = argparse_cmd.parse(argv=argv)
+  let matches = match argv {
+    Some(args) => argparse_cmd.parse(argv=args)
+    None => argparse_cmd.parse()
+  }
   let ctx = matches_to_context(matches)
   execute_command(self.commands, ctx)
 }
