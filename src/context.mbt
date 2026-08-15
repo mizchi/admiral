@@ -12,7 +12,10 @@ pub fn Context::get_string(self : Context, name : String) -> String? {
 }
 
 ///|
-pub fn Context::get_string_required(self : Context, name : String) -> String raise {
+pub fn Context::get_string_required(
+  self : Context,
+  name : String,
+) -> String raise {
   match self.get_string(name) {
     Some(v) => v
     None => fail("missing required option: " + name)

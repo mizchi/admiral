@@ -16,23 +16,23 @@ fn build_option_to_flag(opt : OptionDef) -> @argparse.FlagArg {
 fn build_option_to_option_arg(opt : OptionDef) -> @argparse.OptionArg {
   match (has_short(opt), opt.default_value, opt.required) {
     (true, Some(dv), _) =>
-      @argparse.OptionArg(
-        opt.name, short=opt.short, about=opt.description, default_values=[dv],
-      )
+      @argparse.OptionArg(opt.name, short=opt.short, about=opt.description, default_values=[
+        dv,
+      ])
     (true, None, true) =>
       @argparse.OptionArg(
-        opt.name, short=opt.short, about=opt.description, required=true,
+        opt.name,
+        short=opt.short,
+        about=opt.description,
+        required=true,
       )
     (true, None, false) =>
       @argparse.OptionArg(opt.name, short=opt.short, about=opt.description)
     (false, Some(dv), _) =>
-      @argparse.OptionArg(
-        opt.name, about=opt.description, default_values=[dv],
-      )
+      @argparse.OptionArg(opt.name, about=opt.description, default_values=[dv])
     (false, None, true) =>
       @argparse.OptionArg(opt.name, about=opt.description, required=true)
-    (false, None, false) =>
-      @argparse.OptionArg(opt.name, about=opt.description)
+    (false, None, false) => @argparse.OptionArg(opt.name, about=opt.description)
   }
 }
 
@@ -68,9 +68,9 @@ pub fn build_command(cmd : CommandDef) -> @argparse.Command {
   @argparse.Command(
     cmd.name,
     about=cmd.description,
-    flags=flags,
-    options=options,
-    positionals=positionals,
-    subcommands=subcommands,
+    flags~,
+    options~,
+    positionals~,
+    subcommands~,
   )
 }

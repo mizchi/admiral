@@ -1,0 +1,88 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/admiral"
+
+import {
+  "moonbitlang/core/argparse",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn bool(String, short? : Char, description? : String) -> OptionDef
+
+pub fn build_command(CommandDef) -> @argparse.Command
+
+pub fn cli(name~ : String, version? : String, description? : String, options? : Array[OptionDef], commands? : Array[CommandDef]) -> CliApp
+
+pub fn command(name~ : String, description? : String, options? : Array[OptionDef], positionals? : Array[PositionalDef], examples? : Array[String], subcommands? : Array[CommandDef], run? : ((Context) -> Unit)?) -> CommandDef
+
+pub fn int(String, short? : Char, description? : String, required? : Bool, default? : Int?) -> OptionDef
+
+pub fn positional(String, description? : String, required? : Bool) -> PositionalDef
+
+pub fn string(String, short? : Char, description? : String, required? : Bool, default? : String?) -> OptionDef
+
+// Errors
+
+// Types and methods
+pub(all) struct CliApp {
+  name : String
+  version : String
+  description : String
+  root_options : Array[OptionDef]
+  commands : Array[CommandDef]
+}
+pub fn CliApp::render_bash_completion(Self) -> String
+pub fn CliApp::render_fish_completion(Self) -> String
+pub fn CliApp::render_schema(Self) -> String
+pub fn CliApp::render_schema_json(Self) -> Json
+pub fn CliApp::render_zsh_completion(Self) -> String
+pub fn CliApp::run(Self, argv? : Array[String]?) -> Unit raise
+
+pub(all) struct CommandDef {
+  name : String
+  description : String
+  options : Array[OptionDef]
+  positionals : Array[PositionalDef]
+  examples : Array[String]
+  subcommands : Array[CommandDef]
+  run : ((Context) -> Unit)?
+}
+
+pub(all) struct Context {
+  flags : Map[String, Bool]
+  values : Map[String, Array[String]]
+  subcommand : (String, Context)?
+}
+pub fn Context::get_bool(Self, String) -> Bool
+pub fn Context::get_int(Self, String) -> Int?
+pub fn Context::get_int_required(Self, String) -> Int raise
+pub fn Context::get_string(Self, String) -> String?
+pub fn Context::get_string_required(Self, String) -> String raise
+pub fn Context::get_strings(Self, String) -> Array[String]
+pub fn Context::get_subcommand(Self) -> (String, Self)?
+
+pub(all) struct OptionDef {
+  name : String
+  type_ : OptionType
+  short : Char
+  description : String
+  required : Bool
+  default_value : String?
+} derive(@debug.Debug)
+
+pub(all) enum OptionType {
+  StringOpt
+  BoolOpt
+  IntOpt
+} derive(Eq, @debug.Debug)
+pub impl Show for OptionType
+
+pub(all) struct PositionalDef {
+  name : String
+  description : String
+  required : Bool
+}
+
+// Type aliases
+
+// Traits

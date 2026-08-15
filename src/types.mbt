@@ -6,7 +6,7 @@ pub(all) enum OptionType {
 } derive(Debug, Eq)
 
 ///|
-pub impl Show for OptionType with output(self, logger) {
+pub impl Show for OptionType with fn output(self, logger) {
   match self {
     StringOpt => logger.write_string("StringOpt")
     BoolOpt => logger.write_string("BoolOpt")

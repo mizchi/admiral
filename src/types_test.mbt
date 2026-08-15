@@ -1,3 +1,4 @@
+///|
 test "OptionDef holds string option metadata" {
   let opt : @admiral.OptionDef = {
     name: "output",
@@ -12,6 +13,7 @@ test "OptionDef holds string option metadata" {
   inspect(opt.required, content="true")
 }
 
+///|
 test "CommandDef holds subcommands" {
   let sub : @admiral.CommandDef = {
     name: "sub",

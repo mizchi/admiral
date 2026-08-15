@@ -9,7 +9,7 @@ fn option_type_to_string(t : OptionType) -> String {
 
 ///|
 fn option_def_to_json(opt : OptionDef) -> Json {
-  let m : Map[String, Json] = {}
+  let m : Map[String, Json] = Map([])
   m["type"] = option_type_to_string(opt.type_).to_json()
   m["description"] = opt.description.to_json()
   m["required"] = opt.required.to_json()
@@ -28,7 +28,7 @@ fn option_def_to_json(opt : OptionDef) -> Json {
 
 ///|
 fn positional_def_to_json(pos : PositionalDef) -> Json {
-  let m : Map[String, Json] = {}
+  let m : Map[String, Json] = Map([])
   m["description"] = pos.description.to_json()
   m["required"] = pos.required.to_json()
   Json::object(m)
@@ -47,17 +47,17 @@ fn generate_example(cmd_path : String, options : Array[OptionDef]) -> String {
 
 ///|
 fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
-  let m : Map[String, Json] = {}
+  let m : Map[String, Json] = Map([])
   m["description"] = cmd.description.to_json()
   if cmd.options.length() > 0 {
-    let opts : Map[String, Json] = {}
+    let opts : Map[String, Json] = Map([])
     for opt in cmd.options {
       opts[opt.name] = option_def_to_json(opt)
     }
     m["options"] = Json::object(opts)
   }
   if cmd.positionals.length() > 0 {
-    let poss : Map[String, Json] = {}
+    let poss : Map[String, Json] = Map([])
     for pos in cmd.positionals {
       poss[pos.name] = positional_def_to_json(pos)
     }
@@ -70,7 +70,7 @@ fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
     m["examples"] = Json::array([ex.to_json()])
   }
   if cmd.subcommands.length() > 0 {
-    let subs : Map[String, Json] = {}
+    let subs : Map[String, Json] = Map([])
     for sub in cmd.subcommands {
       let sub_path = cmd_path + " " + sub.name
       subs[sub.name] = command_def_to_json(sub, sub_path)
@@ -82,19 +82,19 @@ fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
 
 ///|
 pub fn CliApp::render_schema_json(self : CliApp) -> Json {
-  let m : Map[String, Json] = {}
+  let m : Map[String, Json] = Map([])
   m["name"] = self.name.to_json()
   m["version"] = self.version.to_json()
   m["description"] = self.description.to_json()
   if self.root_options.length() > 0 {
-    let opts : Map[String, Json] = {}
+    let opts : Map[String, Json] = Map([])
     for opt in self.root_options {
       opts[opt.name] = option_def_to_json(opt)
     }
     m["options"] = Json::object(opts)
   }
   if self.commands.length() > 0 {
-    let cmds : Map[String, Json] = {}
+    let cmds : Map[String, Json] = Map([])
     for cmd in self.commands {
       let cmd_path = self.name + " " + cmd.name
       cmds[cmd.name] = command_def_to_json(cmd, cmd_path)

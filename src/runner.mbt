@@ -1,8 +1,8 @@
 ///|
 pub fn positional(
   name : String,
-  description~ : String = "",
-  required~ : Bool = false
+  description? : String = "",
+  required? : Bool = false,
 ) -> PositionalDef {
   { name, description, required }
 }
@@ -10,12 +10,12 @@ pub fn positional(
 ///|
 pub fn command(
   name~ : String,
-  description~ : String = "",
-  options~ : Array[OptionDef] = [],
-  positionals~ : Array[PositionalDef] = [],
-  examples~ : Array[String] = [],
-  subcommands~ : Array[CommandDef] = [],
-  run~ : ((Context) -> Unit)? = None
+  description? : String = "",
+  options? : Array[OptionDef] = [],
+  positionals? : Array[PositionalDef] = [],
+  examples? : Array[String] = [],
+  subcommands? : Array[CommandDef] = [],
+  run? : ((Context) -> Unit)? = None,
 ) -> CommandDef {
   { name, description, options, positionals, examples, subcommands, run }
 }
@@ -23,10 +23,10 @@ pub fn command(
 ///|
 pub fn cli(
   name~ : String,
-  version~ : String = "0.0.0",
-  description~ : String = "",
-  options~ : Array[OptionDef] = [],
-  commands~ : Array[CommandDef] = []
+  version? : String = "0.0.0",
+  description? : String = "",
+  options? : Array[OptionDef] = [],
+  commands? : Array[CommandDef] = [],
 ) -> CliApp {
   { name, version, description, root_options: options, commands }
 }
@@ -63,7 +63,9 @@ fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
               Some(run_fn) => run_fn(sub_ctx)
               None => {
                 let subs = cmd.subcommands.map(fn(c) { c.name }).join(", ")
-                fail("missing subcommand for '" + name + "'. Available: " + subs)
+                fail(
+                  "missing subcommand for '" + name + "'. Available: " + subs,
+                )
               }
             }
           }
@@ -74,10 +76,7 @@ fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
 }
 
 ///|
-pub fn CliApp::run(
-  self : CliApp,
-  argv~ : Array[String]? = None
-) -> Unit raise {
+pub fn CliApp::run(self : CliApp, argv? : Array[String]? = None) -> Unit raise {
   let flags : Array[@argparse.FlagArg] = []
   let options : Array[@argparse.OptionArg] = []
   for opt in self.root_options {
@@ -91,9 +90,9 @@ pub fn CliApp::run(
     self.name,
     about=self.description,
     version=self.version,
-    flags=flags,
-    options=options,
-    subcommands=subcommands,
+    flags~,
+    options~,
+    subcommands~,
   )
   let matches = match argv {
     Some(args) => argparse_cmd.parse(argv=args)

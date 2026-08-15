@@ -1,0 +1,6 @@
+import {
+  "mizchi/admiral",
+  "moonbitlang/core/env",
+}
+
+pkgtype(kind: "executable")

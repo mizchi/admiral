@@ -1,3 +1,4 @@
+///|
 test "build_command converts simple command" {
   let cmd : CommandDef = {
     name: "greet",
@@ -20,6 +21,7 @@ test "build_command converts simple command" {
   inspect(help.contains("--count"), content="true")
 }
 
+///|
 test "build_command converts nested subcommands" {
   let sub : CommandDef = {
     name: "serve",
