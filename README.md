@@ -16,7 +16,7 @@ Add to `moon.mod` (module dependency):
 
 ```text
 import {
-  "mizchi/admiral@0.1.1",
+  "mizchi/admiral@0.1.2",
 }
 ```
 
