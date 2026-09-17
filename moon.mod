@@ -13,3 +13,5 @@ keywords = [ "cli", "argparse", "moonbit" ]
 description = "Declarative CLI builder for MoonBit, inspired by gunshi"
 
 source = "src"
+
+warnings = "+test_unqualified_package"

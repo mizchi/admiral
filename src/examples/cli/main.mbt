@@ -29,12 +29,9 @@ fn main {
         run=Some(fn(ctx) {
           let name = ctx.get_string_required("name") catch { _ => return }
           let loud = ctx.get_bool("loud")
-          let count = match ctx.get_int("count") {
-            Some(n) => n
-            None => 1
-          }
-          for i = 0; i < count; i = i + 1 {
-            let msg = "Hello, " + name + "!"
+          let count = ctx.get_int("count").unwrap_or(1)
+          for _ in 0..<count {
+            let msg = "Hello, \{name}!"
             if loud {
               println(msg.to_upper())
             } else {
@@ -69,8 +66,7 @@ fn main {
                   println("[DRY RUN] Would apply migrations")
                 } else {
                   match steps {
-                    Some(n) =>
-                      println("Applying " + n.to_string() + " migrations...")
+                    Some(n) => println("Applying \{n} migrations...")
                     None => println("Applying all pending migrations...")
                   }
                 }
@@ -89,13 +85,8 @@ fn main {
                 ),
               ],
               run=Some(fn(ctx) {
-                let steps = match ctx.get_int("steps") {
-                  Some(n) => n
-                  None => 1
-                }
-                println(
-                  "Rolling back " + steps.to_string() + " migration(s)...",
-                )
+                let steps = ctx.get_int("steps").unwrap_or(1)
+                println("Rolling back \{steps} migration(s)...")
                 println("Done.")
               }),
             ),
@@ -113,11 +104,8 @@ fn main {
             ),
           ],
           run=Some(fn(ctx) {
-            let file = match ctx.get_string("file") {
-              Some(f) => f
-              None => "seeds/default.sql"
-            }
-            println("Seeding from: " + file)
+            let file = ctx.get_string("file").unwrap_or("seeds/default.sql")
+            println("Seeding from: \{file}")
           }),
         ),
       ]),

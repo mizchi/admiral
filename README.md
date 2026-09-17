@@ -12,23 +12,23 @@ A thin wrapper around `moonbitlang/core/argparse` that provides:
 
 ## Install
 
-Add to `moon.mod.json`:
+Add to `moon.mod` (module dependency):
 
-```json
-{
-  "deps": {
-    "mizchi/admiral": "0.1.0"
-  }
+```text
+import {
+  "mizchi/admiral@0.1.1",
 }
 ```
 
-Add to `moon.pkg.json`:
+Add to the package's `moon.pkg`:
 
-```json
-{
-  "import": ["mizchi/admiral"]
+```text
+import {
+  "mizchi/admiral",
 }
 ```
+
+Or run `moon add mizchi/admiral` from the module root.
 
 ## Quick Start
 
@@ -49,21 +49,21 @@ fn main {
         ],
         examples=["myapp greet --name Alice", "myapp greet -n Bob -v -c 3"],
         run=Some(fn(ctx) {
-          let name = try { ctx.get_string_required("name") } catch { _ => return }
+          let name = ctx.get_string_required("name") catch { _ => return }
           let verbose = ctx.get_bool("verbose")
-          let count = match ctx.get_int("count") { Some(n) => n; None => 1 }
-          for i = 0; i < count; i = i + 1 {
+          let count = ctx.get_int("count").unwrap_or(1)
+          for i in 0..<count {
             if verbose {
-              println("Hello, " + name + "! (" + (i + 1).to_string() + ")")
+              println("Hello, \{name}! (\{i + 1})")
             } else {
-              println("Hello, " + name + "!")
+              println("Hello, \{name}!")
             }
           }
         }),
       ),
     ],
   )
-  try { app.run() } catch { err => println(err) }
+  app.run() catch { err => println(err) }
 }
 ```
 
@@ -124,13 +124,13 @@ run=Some(fn(ctx) {
   let name = ctx.get_string("name")       // String?
 
   // String (required) — raises if missing
-  let name = try { ctx.get_string_required("name") } catch { _ => return }
+  let name = ctx.get_string_required("name") catch { _ => return }
 
   // Int — parses string value to Int, returns None if missing or invalid
   let port = ctx.get_int("port")           // Int?
 
   // Int (required) — raises if missing or not a valid integer
-  let port = try { ctx.get_int_required("port") } catch { _ => return }
+  let port = ctx.get_int_required("port") catch { _ => return }
 
   // Multiple values (e.g., positional args that accept multiple values)
   let files = ctx.get_strings("files")     // Array[String]
@@ -170,7 +170,7 @@ let app = @admiral.cli(
                   println("[DRY RUN] Would apply migrations")
                 } else {
                   match ctx.get_int("steps") {
-                    Some(n) => println("Applying " + n.to_string() + " migrations...")
+                    Some(n) => println("Applying \{n} migrations...")
                     None => println("Applying all pending migrations...")
                   }
                 }
@@ -183,8 +183,8 @@ let app = @admiral.cli(
                 @admiral.int("steps", short='s', description="Steps to rollback", default=Some(1)),
               ],
               run=Some(fn(ctx) {
-                let steps = match ctx.get_int("steps") { Some(n) => n; None => 1 }
-                println("Rolling back " + steps.to_string() + " migration(s)...")
+                let steps = ctx.get_int("steps").unwrap_or(1)
+                println("Rolling back \{steps} migration(s)...")
               }),
             ),
           ],
@@ -196,8 +196,8 @@ let app = @admiral.cli(
             @admiral.string("file", short='f', description="Seed file", default=Some("seeds/default.sql")),
           ],
           run=Some(fn(ctx) {
-            let file = match ctx.get_string("file") { Some(f) => f; None => "seeds/default.sql" }
-            println("Seeding from: " + file)
+            let file = ctx.get_string("file").unwrap_or("seeds/default.sql")
+            println("Seeding from: \{file}")
           }),
         ),
       ],
@@ -229,7 +229,7 @@ Seeding from: custom.sql
   run=Some(fn(ctx) {
     let files = ctx.get_strings("files")
     for file in files {
-      println("Reading: " + file)
+      println("Reading: \{file}")
     }
   }),
 )

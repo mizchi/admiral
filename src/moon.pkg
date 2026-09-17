@@ -1,4 +1,7 @@
 import {
   "moonbitlang/core/argparse",
-  "moonbitlang/core/debug",
 }
+
+import {
+  "moonbitlang/core/debug",
+} for "test"

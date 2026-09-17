@@ -4,7 +4,7 @@ pub fn positional(
   description? : String = "",
   required? : Bool = false,
 ) -> PositionalDef {
-  { name, description, required }
+  { name, description, required, }
 }
 
 ///|
@@ -17,7 +17,7 @@ pub fn command(
   subcommands? : Array[CommandDef] = [],
   run? : ((Context) -> Unit)? = None,
 ) -> CommandDef {
-  { name, description, options, positionals, examples, subcommands, run }
+  { name, description, options, positionals, examples, subcommands, run, }
 }
 
 ///|
@@ -28,7 +28,7 @@ pub fn cli(
   options? : Array[OptionDef] = [],
   commands? : Array[CommandDef] = [],
 ) -> CliApp {
-  { name, version, description, root_options: options, commands }
+  { name, version, description, root_options: options, commands, }
 }
 
 ///|
@@ -37,7 +37,7 @@ fn matches_to_context(m : @argparse.Matches) -> Context {
     Some((name, sub_matches)) => Some((name, matches_to_context(sub_matches)))
     None => None
   }
-  { flags: m.flags, values: m.values, subcommand: sub }
+  { flags: m.flags, values: m.values, subcommand: sub, }
 }
 
 ///|

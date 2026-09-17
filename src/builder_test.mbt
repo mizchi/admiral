@@ -1,19 +1,29 @@
 ///|
 test "build_command converts simple command" {
-  let cmd : CommandDef = {
+  let cmd : @admiral.CommandDef = {
     name: "greet",
     description: "Greet someone",
     options: [
-      string("name", short='n', description="Name to greet", required=true),
-      bool("verbose", short='v', description="Verbose output"),
-      int("count", short='c', description="Repeat count", default=Some(1)),
+      @admiral.string(
+        "name",
+        short='n',
+        description="Name to greet",
+        required=true,
+      ),
+      @admiral.bool("verbose", short='v', description="Verbose output"),
+      @admiral.int(
+        "count",
+        short='c',
+        description="Repeat count",
+        default=Some(1),
+      ),
     ],
     positionals: [],
     examples: [],
     subcommands: [],
     run: Some(fn(_ctx) { () }),
   }
-  let argparse_cmd = build_command(cmd)
+  let argparse_cmd = @admiral.build_command(cmd)
   let help = argparse_cmd.render_help()
   inspect(help.contains("greet"), content="true")
   inspect(help.contains("--name"), content="true")
@@ -23,16 +33,16 @@ test "build_command converts simple command" {
 
 ///|
 test "build_command converts nested subcommands" {
-  let sub : CommandDef = {
+  let sub : @admiral.CommandDef = {
     name: "serve",
     description: "Start server",
-    options: [int("port", short='p', description="Port")],
+    options: [@admiral.int("port", short='p', description="Port")],
     positionals: [],
     examples: [],
     subcommands: [],
     run: Some(fn(_ctx) { () }),
   }
-  let root : CommandDef = {
+  let root : @admiral.CommandDef = {
     name: "app",
     description: "My app",
     options: [],
@@ -41,7 +51,7 @@ test "build_command converts nested subcommands" {
     subcommands: [sub],
     run: None,
   }
-  let argparse_cmd = build_command(root)
+  let argparse_cmd = @admiral.build_command(root)
   let help = argparse_cmd.render_help()
   inspect(help.contains("serve"), content="true")
 }
