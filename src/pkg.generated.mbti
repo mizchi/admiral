@@ -4,6 +4,7 @@ package "mizchi/admiral"
 import {
   "moonbitlang/core/argparse",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -15,7 +16,7 @@ pub fn cli(name~ : String, version? : String, description? : String, options? : 
 
 pub fn command(name~ : String, description? : String, options? : Array[OptionDef], positionals? : Array[PositionalDef], examples? : Array[String], subcommands? : Array[CommandDef], run? : ((Context) -> Unit)?) -> CommandDef
 
-pub fn int(String, short? : Char, description? : String, required? : Bool, default? : Int?) -> OptionDef
+pub fn int(String, short? : Char, description? : String, required? : Bool, default? : Int32?) -> OptionDef
 
 pub fn positional(String, description? : String, required? : Bool) -> PositionalDef
 
@@ -34,7 +35,7 @@ pub(all) struct CliApp {
 pub fn CliApp::render_bash_completion(Self) -> String
 pub fn CliApp::render_fish_completion(Self) -> String
 pub fn CliApp::render_schema(Self) -> String
-pub fn CliApp::render_schema_json(Self) -> Json
+pub fn CliApp::render_schema_json(Self) -> @json.Json
 pub fn CliApp::render_zsh_completion(Self) -> String
 pub fn CliApp::run(Self, argv? : Array[String]?) -> Unit raise
 
@@ -54,13 +55,14 @@ pub(all) struct Context {
   subcommand : (String, Context)?
 }
 pub fn Context::get_bool(Self, String) -> Bool
-pub fn Context::get_int(Self, String) -> Int?
-pub fn Context::get_int_required(Self, String) -> Int raise
+pub fn Context::get_int(Self, String) -> Int32?
+pub fn Context::get_int_required(Self, String) -> Int32 raise
 pub fn Context::get_string(Self, String) -> String?
 pub fn Context::get_string_required(Self, String) -> String raise
 pub fn Context::get_strings(Self, String) -> Array[String]
 pub fn Context::get_subcommand(Self) -> (String, Self)?
 
+#derive(@debug.Debug)
 pub(all) struct OptionDef {
   name : String
   type_ : OptionType
@@ -68,13 +70,20 @@ pub(all) struct OptionDef {
   description : String
   required : Bool
   default_value : String?
-} derive(@debug.Debug)
+}
+pub fn OptionDef::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum OptionType {
   StringOpt
   BoolOpt
   IntOpt
-} derive(Eq, @debug.Debug)
+}
+pub fn OptionType::equal(Self, Self) -> Bool
+pub fn OptionType::not_equal(Self, Self) -> Bool
+pub fn OptionType::output(Self, &Logger) -> Unit
+pub fn OptionType::to_repr(Self) -> @debug.Repr
+pub fn OptionType::to_string(Self) -> String
 pub impl Show for OptionType
 
 pub(all) struct PositionalDef {

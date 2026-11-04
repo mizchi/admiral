@@ -27,7 +27,11 @@ let dollar : String = "$"
 // === Bash ===
 
 ///|
-fn render_bash_case(sb : StringBuilder, cmd : CommandDef, depth : Int) -> Unit {
+fn render_bash_case(
+  sb : StringBuilder,
+  cmd : CommandDef,
+  depth : Int32,
+) -> Unit {
   let indent = "  ".repeat(depth + 1)
   if cmd.subcommands.length() > 0 {
     let word_index = (depth + 2).to_string()

@@ -10,17 +10,17 @@ fn option_type_to_string(t : OptionType) -> String {
 ///|
 fn option_def_to_json(opt : OptionDef) -> Json {
   let m : Map[String, Json] = Map([])
-  m["type"] = option_type_to_string(opt.type_).to_json()
-  m["description"] = opt.description.to_json()
-  m["required"] = opt.required.to_json()
+  m["type"] = ToJson::to_json(option_type_to_string(opt.type_))
+  m["description"] = ToJson::to_json(opt.description)
+  m["required"] = ToJson::to_json(opt.required)
   if opt.type_ == BoolOpt {
-    m["style"] = "flag".to_json()
+    m["style"] = ToJson::to_json("flag")
   }
   if opt.short != no_short {
-    m["short"] = opt.short.to_string().to_json()
+    m["short"] = ToJson::to_json(opt.short.to_string())
   }
   match opt.default_value {
-    Some(v) => m["default"] = v.to_json()
+    Some(v) => m["default"] = ToJson::to_json(v)
     None => ()
   }
   Json::object(m)
@@ -29,8 +29,8 @@ fn option_def_to_json(opt : OptionDef) -> Json {
 ///|
 fn positional_def_to_json(pos : PositionalDef) -> Json {
   let m : Map[String, Json] = Map([])
-  m["description"] = pos.description.to_json()
-  m["required"] = pos.required.to_json()
+  m["description"] = ToJson::to_json(pos.description)
+  m["required"] = ToJson::to_json(pos.required)
   Json::object(m)
 }
 
@@ -48,7 +48,7 @@ fn generate_example(cmd_path : String, options : Array[OptionDef]) -> String {
 ///|
 fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
   let m : Map[String, Json] = Map([])
-  m["description"] = cmd.description.to_json()
+  m["description"] = ToJson::to_json(cmd.description)
   if cmd.options.length() > 0 {
     let opts : Map[String, Json] = Map([])
     for opt in cmd.options {
@@ -64,10 +64,10 @@ fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
     m["positionals"] = Json::object(poss)
   }
   if cmd.examples.length() > 0 {
-    m["examples"] = Json::array(cmd.examples.map(fn(e) { e.to_json() }))
+    m["examples"] = Json::array(cmd.examples.map(fn(e) { ToJson::to_json(e) }))
   } else if cmd.options.length() > 0 || cmd.positionals.length() > 0 {
     let ex = generate_example(cmd_path, cmd.options)
-    m["examples"] = Json::array([ex.to_json()])
+    m["examples"] = Json::array([ToJson::to_json(ex)])
   }
   if cmd.subcommands.length() > 0 {
     let subs : Map[String, Json] = Map([])
@@ -83,9 +83,9 @@ fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
 ///|
 pub fn CliApp::render_schema_json(self : CliApp) -> Json {
   let m : Map[String, Json] = Map([])
-  m["name"] = self.name.to_json()
-  m["version"] = self.version.to_json()
-  m["description"] = self.description.to_json()
+  m["name"] = ToJson::to_json(self.name)
+  m["version"] = ToJson::to_json(self.version)
+  m["description"] = ToJson::to_json(self.description)
   if self.root_options.length() > 0 {
     let opts : Map[String, Json] = Map([])
     for opt in self.root_options {

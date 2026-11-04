@@ -23,7 +23,7 @@ pub fn Context::get_string_required(
 }
 
 ///|
-pub fn Context::get_int(self : Context, name : String) -> Int? {
+pub fn Context::get_int(self : Context, name : String) -> Int32? {
   match self.get_string(name) {
     Some(s) => {
       let chars = s.to_array()
@@ -62,7 +62,7 @@ pub fn Context::get_int(self : Context, name : String) -> Int? {
 }
 
 ///|
-pub fn Context::get_int_required(self : Context, name : String) -> Int raise {
+pub fn Context::get_int_required(self : Context, name : String) -> Int32 raise {
   match self.get_int(name) {
     Some(v) => v
     None => fail("missing or invalid required option: " + name)

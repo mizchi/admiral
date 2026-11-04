@@ -1,9 +1,19 @@
 ///|
+#derive(Debug, Eq)
 pub(all) enum OptionType {
   StringOpt
   BoolOpt
   IntOpt
-} derive(Debug, Eq)
+}
+
+///|
+pub extend OptionType with Debug::{to_repr}
+
+///|
+pub extend OptionType with Eq::{equal, not_equal}
+
+///|
+pub extend OptionType with Show::{output, to_string}
 
 ///|
 pub impl Show for OptionType with fn output(self, logger) {
@@ -15,6 +25,7 @@ pub impl Show for OptionType with fn output(self, logger) {
 }
 
 ///|
+#derive(Debug)
 pub(all) struct OptionDef {
   name : String
   type_ : OptionType
@@ -22,7 +33,10 @@ pub(all) struct OptionDef {
   description : String
   required : Bool
   default_value : String?
-} derive(Debug)
+}
+
+///|
+pub extend OptionDef with Debug::{to_repr}
 
 ///|
 pub(all) struct PositionalDef {

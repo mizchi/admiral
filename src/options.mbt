@@ -5,10 +5,10 @@ let no_short : Char = '\u0000'
 ///|
 pub fn string(
   name : String,
-  short? : Char = '\u0000',
-  description? : String = "",
-  required? : Bool = false,
-  default? : String? = None,
+  short~ : Char = '\u0000',
+  description~ : String = "",
+  required~ : Bool = false,
+  default~ : String? = None,
 ) -> OptionDef {
   {
     name,
@@ -26,8 +26,8 @@ pub fn string(
 ///|
 pub fn bool(
   name : String,
-  short? : Char = '\u0000',
-  description? : String = "",
+  short~ : Char = '\u0000',
+  description~ : String = "",
 ) -> OptionDef {
   {
     name,
@@ -42,10 +42,10 @@ pub fn bool(
 ///|
 pub fn int(
   name : String,
-  short? : Char = '\u0000',
-  description? : String = "",
-  required? : Bool = false,
-  default? : Int? = None,
+  short~ : Char = '\u0000',
+  description~ : String = "",
+  required~ : Bool = false,
+  default~ : Int32? = None,
 ) -> OptionDef {
   {
     name,
