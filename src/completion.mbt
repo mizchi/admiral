@@ -27,96 +27,136 @@ let dollar : String = "$"
 // === Bash ===
 
 ///|
-fn render_bash_case(
+fn render_shell_scan(
   sb : StringBuilder,
-  cmd : CommandDef,
-  depth : Int32,
+  options : Array[OptionDef],
+  commands : Array[CommandDef],
+  fn_name : String,
+  limit : String,
 ) -> Unit {
-  let indent = "  ".repeat(depth + 1)
-  if cmd.subcommands.length() > 0 {
-    let word_index = (depth + 2).to_string()
-    sb.write_string(
-      indent + "case \"" + dollar + "{words[" + word_index + "]}\" in\n",
-    )
-    for sub in cmd.subcommands {
-      sb.write_string(indent + "  " + sub.name + ")\n")
-      if sub.subcommands.length() > 0 {
-        render_bash_case(sb, sub, depth + 1)
-      } else {
-        let w = collect_option_words(sub.options)
-        let line = indent +
-          "    COMPREPLY=($(compgen -W \"" +
-          w +
-          "\" -- \"" +
-          dollar +
-          "cur\"))\n"
-        sb.write_string(line)
-      }
-      sb.write_string(indent + "    ;;\n")
-    }
-    let sub_names = collect_command_names(cmd.subcommands)
-    let own_opts = collect_option_words(cmd.options)
-    let all = if own_opts.length() > 0 {
-      sub_names + " " + own_opts
+  sb.write_string("  while (( pos < " + limit + " )); do\n")
+  sb.write_string("    case \"" + dollar + "{words[pos]}\" in\n")
+  for opt in options {
+    let long = "'--" + escape_single_quote(opt.name) + "'"
+    let short = if has_short(opt) {
+      "|'-" + escape_single_quote(opt.short.to_string()) + "'"
     } else {
-      sub_names
+      ""
     }
-    sb.write_string(indent + "  *)\n")
-    let fallback = indent +
-      "    COMPREPLY=($(compgen -W \"" +
-      all +
-      "\" -- \"" +
+    let increment = if opt.type_ == BoolOpt { 1 } else { 2 }
+    sb.write_string(
+      "      " +
+      long +
+      short +
+      ") ((pos += " +
+      increment.to_string() +
+      ")) ;;\n",
+    )
+    if opt.type_ != BoolOpt {
+      sb.write_string("      " + long + "=*) ((pos += 1)) ;;\n")
+    }
+  }
+  for i, cmd in commands {
+    let sub_fn = fn_name + "_c" + i.to_string()
+    sb.write_string(
+      "      '" +
+      escape_single_quote(cmd.name) +
+      "') ((pos += 1)); " +
+      sub_fn +
+      "; return ;;\n",
+    )
+  }
+  let has_short_options = options.any(fn(opt) { has_short(opt) })
+  if has_short_options {
+    sb.write_string("      -[!-]*)\n")
+    sb.write_string(
+      "        local rest=\"" + dollar + "{words[pos]#-}\" short\n",
+    )
+    sb.write_string("        ((pos += 1))\n")
+    sb.write_string("        while [[ -n \"" + dollar + "rest\" ]]; do\n")
+    sb.write_string(
+      "          short=\"" +
       dollar +
-      "cur\"))\n"
-    sb.write_string(fallback)
-    sb.write_string(indent + "    ;;\n")
-    sb.write_string(indent + "esac\n")
-  } else {
-    let w = collect_option_words(cmd.options)
-    let line = indent +
-      "COMPREPLY=($(compgen -W \"" +
-      w +
-      "\" -- \"" +
+      "{rest:0:1}\"; rest=\"" +
       dollar +
-      "cur\"))\n"
-    sb.write_string(line)
+      "{rest:1}\"\n",
+    )
+    sb.write_string("          case \"" + dollar + "short\" in\n")
+    for opt in options {
+      if has_short(opt) {
+        let action = if opt.type_ == BoolOpt {
+          ":"
+        } else {
+          "[[ -z \"" + dollar + "rest\" ]] && ((pos += 1)); break"
+        }
+        sb.write_string(
+          "            '" +
+          escape_single_quote(opt.short.to_string()) +
+          "') " +
+          action +
+          " ;;\n",
+        )
+      }
+    }
+    sb.write_string(
+      "            *) break ;;\n          esac\n        done ;;\n",
+    )
+  }
+  sb.write_string("      *) ((pos += 1)) ;;\n")
+  sb.write_string("    esac\n  done\n")
+}
+
+///|
+fn render_bash_node(
+  sb : StringBuilder,
+  fn_name : String,
+  options : Array[OptionDef],
+  commands : Array[CommandDef],
+) -> Unit {
+  sb.write_string(fn_name + "() {\n")
+  render_shell_scan(sb, options, commands, fn_name, "cword")
+  sb.write_string("  (( pos > cword )) && return\n")
+  let candidates = collect_command_names(commands) +
+    " " +
+    collect_option_words(options)
+  sb.write_string(
+    "  COMPREPLY=($(compgen -W \"" +
+    candidates +
+    "\" -- \"" +
+    dollar +
+    "cur\"))\n",
+  )
+  sb.write_string("}\n\n")
+  for i, cmd in commands {
+    render_bash_node(
+      sb,
+      fn_name + "_c" + i.to_string(),
+      cmd.options,
+      cmd.subcommands,
+    )
   }
 }
 
 ///|
+/// Generates a Bash completion script for this application.
+///
+/// ```mbt check
+/// test {
+///   assert_true(
+///     @cmder.cli(name="demo").render_bash_completion().contains("complete -F"),
+///   )
+/// }
+/// ```
 pub fn CliApp::render_bash_completion(self : CliApp) -> String {
   let sb = StringBuilder()
   let fn_name = "_" + self.name.replace(old="-", new="_")
   sb.write_string(fn_name + "() {\n")
   sb.write_string("  local cur prev words cword\n")
-  sb.write_string("  _init_completion || return\n\n")
-  sb.write_string("  case \"" + dollar + "{words[1]}\" in\n")
-  for cmd in self.commands {
-    sb.write_string("    " + cmd.name + ")\n")
-    if cmd.subcommands.length() > 0 {
-      render_bash_case(sb, cmd, 1)
-    } else {
-      let w = collect_option_words(cmd.options)
-      let line = "      COMPREPLY=($(compgen -W \"" +
-        w +
-        "\" -- \"" +
-        dollar +
-        "cur\"))\n"
-      sb.write_string(line)
-    }
-    sb.write_string("      ;;\n")
-  }
-  let names = collect_command_names(self.commands)
-  sb.write_string("    *)\n")
-  let fallback = "      COMPREPLY=($(compgen -W \"" +
-    names +
-    "\" -- \"" +
-    dollar +
-    "cur\"))\n"
-  sb.write_string(fallback)
-  sb.write_string("      ;;\n")
-  sb.write_string("  esac\n")
-  sb.write_string("}\n")
+  sb.write_string("  _init_completion || return\n")
+  sb.write_string("  local pos=1\n")
+  sb.write_string("  " + fn_name + "_root\n")
+  sb.write_string("}\n\n")
+  render_bash_node(sb, fn_name + "_root", self.root_options, self.commands)
   sb.write_string("complete -F " + fn_name + " " + self.name + "\n")
   sb.to_string()
 }
@@ -124,15 +164,46 @@ pub fn CliApp::render_bash_completion(self : CliApp) -> String {
 // === Zsh ===
 
 ///|
+fn render_zsh_options(sb : StringBuilder, options : Array[OptionDef]) -> Unit {
+  if options.length() == 0 {
+    return
+  }
+  sb.write_string("  _arguments \\\n")
+  for i, opt in options {
+    let desc = escape_single_quote(opt.description)
+    let value_spec = if opt.type_ == BoolOpt { "" } else { ":value:" }
+    let flag = if has_short(opt) {
+      "'-" +
+      opt.short.to_string() +
+      "[" +
+      desc +
+      "]" +
+      value_spec +
+      "' '--" +
+      opt.name +
+      "[" +
+      desc +
+      "]" +
+      value_spec +
+      "'"
+    } else {
+      "'--" + opt.name + "[" + desc + "]" + value_spec + "'"
+    }
+    let end = if i < options.length() - 1 { " \\" } else { "" }
+    sb.write_string("    " + flag + end + "\n")
+  }
+}
+
+///|
 fn render_zsh_command(
   sb : StringBuilder,
   cmd : CommandDef,
-  app_name : String,
-  full : String,
+  fn_name : String,
 ) -> Unit {
-  let safe = full.replace(old="-", new="_")
-  let fn_name = "_" + app_name.replace(old="-", new="_") + "_" + safe
   sb.write_string(fn_name + "() {\n")
+  sb.write_string("  local start=" + dollar + "((pos - 1))\n")
+  render_shell_scan(sb, cmd.options, cmd.subcommands, fn_name, "CURRENT")
+  sb.write_string("  (( pos > CURRENT )) && return\n")
   if cmd.subcommands.length() > 0 {
     sb.write_string("  local -a commands\n")
     sb.write_string("  commands=(\n")
@@ -144,39 +215,40 @@ fn render_zsh_command(
     sb.write_string("  _describe 'command' commands\n")
   }
   if cmd.options.length() > 0 {
-    sb.write_string("  _arguments \\\n")
-    for i, opt in cmd.options {
-      let desc = escape_single_quote(opt.description)
-      let flag = if has_short(opt) {
-        "'-" +
-        opt.short.to_string() +
-        "[" +
-        desc +
-        "]' '--" +
-        opt.name +
-        "[" +
-        desc +
-        "]'"
-      } else {
-        "'--" + opt.name + "[" + desc + "]'"
-      }
-      let end = if i < cmd.options.length() - 1 { " \\" } else { "" }
-      sb.write_string("    " + flag + end + "\n")
-    }
+    sb.write_string(
+      "  local -a words=(\"" +
+      dollar +
+      "{words[@]:" +
+      dollar +
+      "((start - 1))}\")\n",
+    )
+    sb.write_string("  local CURRENT=" + dollar + "((CURRENT - start + 1))\n")
+    render_zsh_options(sb, cmd.options)
   }
   sb.write_string("}\n\n")
-  for sub in cmd.subcommands {
-    let sub_full = full + "_" + sub.name
-    render_zsh_command(sb, sub, app_name, sub_full)
+  for i, sub in cmd.subcommands {
+    render_zsh_command(sb, sub, fn_name + "_c" + i.to_string())
   }
 }
 
 ///|
+/// Generates a Zsh completion script for this application.
+///
+/// ```mbt check
+/// test {
+///   assert_true(
+///     @cmder.cli(name="demo").render_zsh_completion().contains("#compdef demo"),
+///   )
+/// }
+/// ```
 pub fn CliApp::render_zsh_completion(self : CliApp) -> String {
   let sb = StringBuilder()
   sb.write_string("#compdef " + self.name + "\n\n")
   let fn_name = "_" + self.name.replace(old="-", new="_")
   sb.write_string(fn_name + "() {\n")
+  sb.write_string("  local pos=2\n")
+  render_shell_scan(sb, self.root_options, self.commands, fn_name, "CURRENT")
+  sb.write_string("  (( pos > CURRENT )) && return\n")
   sb.write_string("  local -a commands\n")
   sb.write_string("  commands=(\n")
   for cmd in self.commands {
@@ -185,9 +257,10 @@ pub fn CliApp::render_zsh_completion(self : CliApp) -> String {
   }
   sb.write_string("  )\n")
   sb.write_string("  _describe 'command' commands\n")
+  render_zsh_options(sb, self.root_options)
   sb.write_string("}\n\n")
-  for cmd in self.commands {
-    render_zsh_command(sb, cmd, self.name, cmd.name)
+  for i, cmd in self.commands {
+    render_zsh_command(sb, cmd, fn_name + "_c" + i.to_string())
   }
   sb.write_string("compdef " + fn_name + " " + self.name + "\n")
   sb.to_string()
@@ -248,6 +321,17 @@ fn render_fish_subcommands(
 }
 
 ///|
+/// Generates a Fish completion script for this application.
+///
+/// ```mbt check
+/// test {
+///   assert_true(
+///     @cmder.cli(name="demo")
+///     .render_fish_completion()
+///     .contains("Fish completions"),
+///   )
+/// }
+/// ```
 pub fn CliApp::render_fish_completion(self : CliApp) -> String {
   let sb = StringBuilder()
   sb.write_string("# Fish completions for " + self.name + "\n")

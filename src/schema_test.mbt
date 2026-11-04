@@ -109,3 +109,47 @@ test "render_schema_json returns Json value" {
   inspect(s.contains("\"hello\""), content="true")
   inspect(s.contains("\"name\""), content="true")
 }
+
+///|
+test "generated example includes required positionals" {
+  let app = @cmder.cli(name="app", commands=[
+    @cmder.command(
+      name="copy",
+      options=[@cmder.string("format", required=true)],
+      positionals=[
+        @cmder.positional("source", required=true),
+        @cmder.positional("destination"),
+      ],
+    ),
+  ])
+  inspect(
+    app.render_schema().contains("app copy --format <format> <source>"),
+    content="true",
+  )
+}
+
+///|
+test "generated nested example includes required ancestor arguments" {
+  let app = @cmder.cli(
+    name="app",
+    options=[@cmder.string("profile", required=true)],
+    commands=[
+      @cmder.command(
+        name="db",
+        options=[@cmder.string("region", required=true)],
+        subcommands=[
+          @cmder.command(name="up", run=Some(fn(_) { () }), positionals=[
+            @cmder.positional("version", required=true),
+          ]),
+        ],
+      ),
+    ],
+  )
+  inspect(
+    app
+    .render_schema()
+    .contains("app --profile <profile> db --region <region> up <version>"),
+    content="true",
+  )
+  app.run(argv=Some(["--profile", "p", "db", "--region", "r", "up", "1"]))
+}

@@ -35,11 +35,20 @@ fn positional_def_to_json(pos : PositionalDef) -> Json {
 }
 
 ///|
-fn generate_example(cmd_path : String, options : Array[OptionDef]) -> String {
+fn generate_example(
+  cmd_path : String,
+  options : Array[OptionDef],
+  positionals : Array[PositionalDef],
+) -> String {
   let parts : Array[String] = [cmd_path]
   for opt in options {
     if opt.required {
       parts.push("--" + opt.name + " <" + opt.name + ">")
+    }
+  }
+  for pos in positionals {
+    if pos.required {
+      parts.push("<" + pos.name + ">")
     }
   }
   parts.join(" ")
@@ -66,13 +75,15 @@ fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
   if cmd.examples.length() > 0 {
     m["examples"] = Json::array(cmd.examples.map(fn(e) { ToJson::to_json(e) }))
   } else if cmd.options.length() > 0 || cmd.positionals.length() > 0 {
-    let ex = generate_example(cmd_path, cmd.options)
+    let ex = generate_example(cmd_path, cmd.options, cmd.positionals)
     m["examples"] = Json::array([ToJson::to_json(ex)])
   }
   if cmd.subcommands.length() > 0 {
     let subs : Map[String, Json] = Map([])
     for sub in cmd.subcommands {
-      let sub_path = cmd_path + " " + sub.name
+      let sub_path = generate_example(cmd_path, cmd.options, cmd.positionals) +
+        " " +
+        sub.name
       subs[sub.name] = command_def_to_json(sub, sub_path)
     }
     m["commands"] = Json::object(subs)
@@ -81,6 +92,14 @@ fn command_def_to_json(cmd : CommandDef, cmd_path : String) -> Json {
 }
 
 ///|
+/// Returns a structured JSON description of the application.
+///
+/// ```mbt check
+/// test {
+///   let schema = @cmder.cli(name="demo").render_schema_json()
+///   assert_true(schema.stringify().contains("demo"))
+/// }
+/// ```
 pub fn CliApp::render_schema_json(self : CliApp) -> Json {
   let m : Map[String, Json] = Map([])
   m["name"] = ToJson::to_json(self.name)
@@ -96,7 +115,9 @@ pub fn CliApp::render_schema_json(self : CliApp) -> Json {
   if self.commands.length() > 0 {
     let cmds : Map[String, Json] = Map([])
     for cmd in self.commands {
-      let cmd_path = self.name + " " + cmd.name
+      let cmd_path = generate_example(self.name, self.root_options, []) +
+        " " +
+        cmd.name
       cmds[cmd.name] = command_def_to_json(cmd, cmd_path)
     }
     m["commands"] = Json::object(cmds)
@@ -105,6 +126,13 @@ pub fn CliApp::render_schema_json(self : CliApp) -> Json {
 }
 
 ///|
+/// Returns the application schema as a JSON string.
+///
+/// ```mbt check
+/// test {
+///   assert_true(@cmder.cli(name="demo").render_schema().contains("demo"))
+/// }
+/// ```
 pub fn CliApp::render_schema(self : CliApp) -> String {
   self.render_schema_json().stringify()
 }

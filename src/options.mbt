@@ -3,6 +3,14 @@
 let no_short : Char = '\u0000'
 
 ///|
+/// Defines a string-valued option.
+///
+/// ```mbt check
+/// test {
+///   let option = @cmder.string("name", short='n', required=true)
+///   assert_true(option.required)
+/// }
+/// ```
 pub fn string(
   name : String,
   short~ : Char = '\u0000',
@@ -24,6 +32,14 @@ pub fn string(
 }
 
 ///|
+/// Defines a Boolean flag, which defaults to false.
+///
+/// ```mbt check
+/// test {
+///   let option = @cmder.bool("verbose", short='v')
+///   inspect(option.name, content="verbose")
+/// }
+/// ```
 pub fn bool(
   name : String,
   short~ : Char = '\u0000',
@@ -40,6 +56,14 @@ pub fn bool(
 }
 
 ///|
+/// Defines an integer-valued option.
+///
+/// ```mbt check
+/// test {
+///   let option = @cmder.int("count", default=Some(3))
+///   inspect(option.required, content="false")
+/// }
+/// ```
 pub fn int(
   name : String,
   short~ : Char = '\u0000',

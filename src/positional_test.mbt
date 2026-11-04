@@ -42,6 +42,32 @@ test "positionals accessible via context get_strings" {
 }
 
 ///|
+test "non-final positionals leave values for later arguments" {
+  let source = Ref("")
+  let destination = Ref([])
+  let app = @cmder.cli(name="test", commands=[
+    @cmder.command(
+      name="copy",
+      positionals=[
+        @cmder.positional("source", required=true),
+        @cmder.positional("destination"),
+      ],
+      run=Some(fn(ctx) {
+        source.val = ctx.get_string("source").unwrap_or("")
+        destination.val = ctx.get_strings("destination")
+      }),
+    ),
+  ])
+  app.run(argv=Some(["copy", "a", "b", "c"]))
+  inspect(source.val, content="a")
+  inspect(destination.val.length(), content="2")
+  inspect(destination.val[0], content="b")
+  inspect(destination.val[1], content="c")
+  app.run(argv=Some(["copy", "a"]))
+  inspect(destination.val.length(), content="0")
+}
+
+///|
 test "render_schema includes positionals" {
   let app = @cmder.cli(name="test", version="0.1.0", description="Test", commands=[
     @cmder.command(name="compile", description="Compile source", positionals=[

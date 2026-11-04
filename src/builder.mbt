@@ -37,23 +37,26 @@ fn build_option_to_option_arg(opt : OptionDef) -> @argparse.OptionArg {
 }
 
 ///|
-fn build_positional(pos : PositionalDef) -> @argparse.PositionArg {
-  if pos.required {
-    @argparse.PositionArg(
-      pos.name,
-      about=pos.description,
-      num_args=@argparse.ValueRange(lower=1),
-    )
+fn build_positional(pos : PositionalDef, last : Bool) -> @argparse.PositionArg {
+  let lower = if pos.required { 1 } else { 0 }
+  let range = if last {
+    @argparse.ValueRange(lower~)
   } else {
-    @argparse.PositionArg(
-      pos.name,
-      about=pos.description,
-      num_args=@argparse.ValueRange(lower=0),
-    )
+    @argparse.ValueRange(lower~, upper=1)
   }
+  @argparse.PositionArg(pos.name, about=pos.description, num_args=range)
 }
 
 ///|
+/// Converts a command definition into an `argparse.Command`.
+///
+/// ```mbt check
+/// test {
+///   let command = @cmder.command(name="greet")
+///   let parser = @cmder.build_command(command)
+///   assert_true(parser.render_help().contains("greet"))
+/// }
+/// ```
 pub fn build_command(cmd : CommandDef) -> @argparse.Command {
   let flags : Array[@argparse.FlagArg] = []
   let options : Array[@argparse.OptionArg] = []
@@ -63,7 +66,9 @@ pub fn build_command(cmd : CommandDef) -> @argparse.Command {
       StringOpt | IntOpt => options.push(build_option_to_option_arg(opt))
     }
   }
-  let positionals = cmd.positionals.map(fn(p) { build_positional(p) })
+  let positionals = cmd.positionals.mapi(fn(i, p) {
+    build_positional(p, i == cmd.positionals.length() - 1)
+  })
   let subcommands = cmd.subcommands.map(fn(sub) { build_command(sub) })
   @argparse.Command(
     cmd.name,

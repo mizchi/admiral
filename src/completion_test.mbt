@@ -55,3 +55,61 @@ test "fish completion contains commands and options" {
   inspect(fish.contains("migrate"), content="true")
   inspect(fish.contains("-l dry-run"), content="true")
 }
+
+///|
+test "nested completion dispatches to the selected command" {
+  let app = @cmder.cli(name="myapp", commands=[
+    @cmder.command(name="db", subcommands=[
+      @cmder.command(name="migrate", subcommands=[
+        @cmder.command(name="up", options=[@cmder.string("target")]),
+      ]),
+    ]),
+  ])
+  let bash = app.render_bash_completion()
+  inspect(bash.contains("while (( pos < cword )); do"), content="true")
+  inspect(
+    bash.contains("'db') ((pos += 1)); _myapp_root_c0; return ;;"),
+    content="true",
+  )
+  let zsh = app.render_zsh_completion()
+  inspect(zsh.contains("while (( pos < CURRENT )); do"), content="true")
+  inspect(
+    zsh.contains("'db') ((pos += 1)); _myapp_c0; return ;;"),
+    content="true",
+  )
+  inspect(
+    zsh.contains("'migrate') ((pos += 1)); _myapp_c0_c0; return ;;"),
+    content="true",
+  )
+  inspect(
+    zsh.contains("'up') ((pos += 1)); _myapp_c0_c0_c0; return ;;"),
+    content="true",
+  )
+  inspect(zsh.contains("'--target[]:value:'"), content="true")
+}
+
+///|
+test "completion keeps colliding command names distinct and scans short groups" {
+  let app = @cmder.cli(
+    name="app",
+    options=[
+      @cmder.bool("verbose", short='v'),
+      @cmder.string("profile", short='p'),
+    ],
+    commands=[
+      @cmder.command(name="foo-bar", options=[@cmder.bool("first")]),
+      @cmder.command(name="foo_bar", options=[@cmder.bool("second")]),
+    ],
+  )
+  for script in [app.render_bash_completion(), app.render_zsh_completion()] {
+    inspect(script.contains("'foo-bar') ((pos += 1));"), content="true")
+    inspect(script.contains("'foo_bar') ((pos += 1));"), content="true")
+    inspect(script.contains("_c0() {"), content="true")
+    inspect(script.contains("_c1() {"), content="true")
+    inspect(script.contains("-[!-]*)"), content="true")
+    inspect(
+      script.contains("'p') [[ -z \"$rest\" ]] && ((pos += 1)); break ;;"),
+      content="true",
+    )
+  }
+}

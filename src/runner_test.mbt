@@ -1,4 +1,18 @@
 ///|
+test "descendant default takes precedence over ancestor value" {
+  let captured = Ref("")
+  let app = @cmder.cli(name="app", options=[@cmder.string("mode")], commands=[
+    @cmder.command(
+      name="go",
+      options=[@cmder.string("mode", default=Some("child"))],
+      run=Some(fn(ctx) { captured.val = ctx.get_string("mode").unwrap_or("") }),
+    ),
+  ])
+  app.run(argv=Some(["--mode", "root", "go"]))
+  inspect(captured.val, content="child")
+}
+
+///|
 test "cli creates CliApp and run executes command" {
   let called = Ref(false)
   let captured_name = Ref("")
@@ -81,4 +95,39 @@ test "cli run with nested subcommand" {
   ])
   app.run(argv=Some(["db", "migrate", "--dry-run"]))
   inspect(result.val, content="dry")
+}
+
+///|
+test "callbacks receive ancestor options and closest values win" {
+  let verbose = Ref(false)
+  let region = Ref("")
+  let mode = Ref("")
+  let app = @cmder.cli(
+    name="app",
+    options=[@cmder.bool("verbose"), @cmder.string("mode")],
+    commands=[
+      @cmder.command(name="db", options=[@cmder.string("region")], subcommands=[
+        @cmder.command(
+          name="up",
+          options=[@cmder.string("mode")],
+          run=Some(fn(ctx) {
+            verbose.val = ctx.get_bool("verbose")
+            region.val = ctx.get_string("region").unwrap_or("")
+            mode.val = ctx.get_string("mode").unwrap_or("")
+          }),
+        ),
+      ]),
+    ],
+  )
+  app.run(
+    argv=Some([
+      "--verbose", "--mode", "root", "db", "--region", "west", "up", "--mode", "child",
+    ]),
+  )
+  inspect(verbose.val, content="true")
+  inspect(region.val, content="west")
+  inspect(mode.val, content="child")
+  app.run(argv=Some(["--mode", "root", "db", "up"]))
+  inspect(verbose.val, content="false")
+  inspect(mode.val, content="root")
 }

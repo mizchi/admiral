@@ -1,4 +1,13 @@
 ///|
+/// Defines a positional argument. The final positional accepts multiple values;
+/// earlier positionals accept at most one. Declare required arguments first.
+///
+/// ```mbt check
+/// test {
+///   let file = @cmder.positional("file", required=true)
+///   assert_true(file.required)
+/// }
+/// ```
 pub fn positional(
   name : String,
   description~ : String = "",
@@ -8,6 +17,14 @@ pub fn positional(
 }
 
 ///|
+/// Defines a command with options, positionals, subcommands, and a callback.
+///
+/// ```mbt check
+/// test {
+///   let greet = @cmder.command(name="greet", options=[@cmder.string("name")])
+///   inspect(greet.name, content="greet")
+/// }
+/// ```
 pub fn command(
   name~ : String,
   description~ : String = "",
@@ -21,6 +38,15 @@ pub fn command(
 }
 
 ///|
+/// Creates an application. Ancestor values are available to callbacks;
+/// values at a descendant level, including defaults, take precedence by name.
+///
+/// ```mbt check
+/// test {
+///   let app = @cmder.cli(name="demo", commands=[@cmder.command(name="hello")])
+///   inspect(app.name, content="demo")
+/// }
+/// ```
 pub fn cli(
   name~ : String,
   version~ : String = "0.0.0",
@@ -51,11 +77,27 @@ fn find_command_def(commands : Array[CommandDef], name : String) -> CommandDef? 
 }
 
 ///|
+fn inherit_context(parent : Context, child : Context) -> Context {
+  let flags = parent.flags.copy()
+  let values = parent.values.copy()
+  for name, value in child.flags {
+    values.remove(name)
+    flags[name] = value
+  }
+  for name, value in child.values {
+    flags.remove(name)
+    values[name] = value
+  }
+  { flags, values, subcommand: child.subcommand, }
+}
+
+///|
 fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
   match ctx.subcommand {
     Some((name, sub_ctx)) =>
       match find_command_def(commands, name) {
-        Some(cmd) =>
+        Some(cmd) => {
+          let sub_ctx = inherit_context(ctx, sub_ctx)
           if cmd.subcommands.length() > 0 && sub_ctx.subcommand is Some(_) {
             execute_command(cmd.subcommands, sub_ctx)
           } else {
@@ -69,6 +111,7 @@ fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
               }
             }
           }
+        }
         None => fail("unknown command: " + name)
       }
     None => fail("no command specified. Use --help for usage.")
@@ -76,6 +119,19 @@ fn execute_command(commands : Array[CommandDef], ctx : Context) -> Unit raise {
 }
 
 ///|
+/// Parses arguments and executes the selected command's callback.
+/// Omit `argv` to read process arguments.
+///
+/// ```mbt check
+/// test {
+///   let called = Ref(false)
+///   let app = @cmder.cli(name="demo", commands=[
+///     @cmder.command(name="go", run=Some(fn(_) { called.val = true })),
+///   ])
+///   app.run(argv=Some(["go"]))
+///   assert_true(called.val)
+/// }
+/// ```
 pub fn CliApp::run(self : CliApp, argv~ : Array[String]? = None) -> Unit raise {
   let flags : Array[@argparse.FlagArg] = []
   let options : Array[@argparse.OptionArg] = []

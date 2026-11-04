@@ -115,6 +115,10 @@ Three types of options, plus positional arguments:
 
 Inside a `run` callback, use `Context` methods to read parsed values:
 
+Callbacks can also read options supplied to ancestor commands, including root
+options. When a descendant has a value with the same name, that value takes
+precedence, including defaults. Options are parsed at the level where declared.
+
 ```moonbit
 run=Some(fn(ctx) {
   // Bool — returns false if not specified
@@ -218,6 +222,9 @@ Seeding from: custom.sql
 ```
 
 ### Positional Arguments
+
+Each positional argument except the last accepts at most one value; the last
+accepts the remaining values. Declare required positionals before optional ones.
 
 ```moonbit
 @cmder.command(
