@@ -143,13 +143,13 @@ fn Context::get_positionals(self, name: String) -> Array[String]
 
 ### argparse Mapping
 
-| admiral | argparse |
-|---------|----------|
-| `OptionDef(type_=StringOpt)` | `argparse.OptionArg` |
-| `OptionDef(type_=BoolOpt)` | `argparse.FlagArg` |
-| `OptionDef(type_=IntOpt)` | `argparse.OptionArg` (Context で Int 変換) |
-| `CommandDef.subcommands` | `argparse.Command.subcommands` |
-| `CliApp` | ルート `argparse.Command` + サブコマンド |
+| admiral                      | argparse                                   |
+| ---------------------------- | ------------------------------------------ |
+| `OptionDef(type_=StringOpt)` | `argparse.OptionArg`                       |
+| `OptionDef(type_=BoolOpt)`   | `argparse.FlagArg`                         |
+| `OptionDef(type_=IntOpt)`    | `argparse.OptionArg` (Context で Int 変換) |
+| `CommandDef.subcommands`     | `argparse.Command.subcommands`             |
+| `CliApp`                     | ルート `argparse.Command` + サブコマンド   |
 
 ### Help Generation
 
@@ -163,12 +163,12 @@ argparse の `Command::render_help() -> String` をそのまま委譲。将来�
 
 ## Testing Strategy
 
-| Package | What to test |
-|---------|-------------|
+| Package | What to test                                                  |
+| ------- | ------------------------------------------------------------- |
 | options | `string()` / `bool()` / `int()` が正しい `OptionDef` を返すか |
-| builder | `CommandDef` → `argparse.Command` 変換の正しさ |
-| context | `Matches` からの型付き取得（正常系 + 型変換エラー） |
-| runner | E2E: コマンド定義 → パース → run コールバック実行 |
+| builder | `CommandDef` → `argparse.Command` 変換の正しさ                |
+| context | `Matches` からの型付き取得（正常系 + 型変換エラー）           |
+| runner  | E2E: コマンド定義 → パース → run コールバック実行             |
 
 ## Dependencies
 
