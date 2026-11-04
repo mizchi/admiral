@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "mizchi/admiral"
+package "hustcer/cmder"
 
 import {
   "moonbitlang/core/argparse",

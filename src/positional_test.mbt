@@ -1,6 +1,6 @@
 ///|
 test "positional() creates PositionalDef" {
-  let p = @admiral.positional("file", description="Input file", required=true)
+  let p = @cmder.positional("file", description="Input file", required=true)
   inspect(p.name, content="file")
   inspect(p.description, content="Input file")
   inspect(p.required, content="true")
@@ -8,17 +8,17 @@ test "positional() creates PositionalDef" {
 
 ///|
 test "positional default not required" {
-  let p = @admiral.positional("output", description="Output file")
+  let p = @cmder.positional("output", description="Output file")
   inspect(p.required, content="false")
 }
 
 ///|
 test "command with positionals builds correctly" {
-  let cmd = @admiral.command(name="compile", description="Compile source", positionals=[
-    @admiral.positional("input", description="Input file", required=true),
-    @admiral.positional("output", description="Output file"),
+  let cmd = @cmder.command(name="compile", description="Compile source", positionals=[
+    @cmder.positional("input", description="Input file", required=true),
+    @cmder.positional("output", description="Output file"),
   ])
-  let argparse_cmd = @admiral.build_command(cmd)
+  let argparse_cmd = @cmder.build_command(cmd)
   let help = argparse_cmd.render_help()
   inspect(help.contains("input"), content="true")
   inspect(help.contains("output"), content="true")
@@ -27,11 +27,11 @@ test "command with positionals builds correctly" {
 ///|
 test "positionals accessible via context get_strings" {
   let captured = Ref([])
-  let app = @admiral.cli(name="test", version="0.1.0", description="Test", commands=[
-    @admiral.command(
+  let app = @cmder.cli(name="test", version="0.1.0", description="Test", commands=[
+    @cmder.command(
       name="cat",
       description="Cat files",
-      positionals=[@admiral.positional("files", description="Files to cat")],
+      positionals=[@cmder.positional("files", description="Files to cat")],
       run=Some(fn(ctx) { captured.val = ctx.get_strings("files") }),
     ),
   ])
@@ -43,10 +43,10 @@ test "positionals accessible via context get_strings" {
 
 ///|
 test "render_schema includes positionals" {
-  let app = @admiral.cli(name="test", version="0.1.0", description="Test", commands=[
-    @admiral.command(name="compile", description="Compile source", positionals=[
-      @admiral.positional("input", description="Input file", required=true),
-      @admiral.positional("output", description="Output file"),
+  let app = @cmder.cli(name="test", version="0.1.0", description="Test", commands=[
+    @cmder.command(name="compile", description="Compile source", positionals=[
+      @cmder.positional("input", description="Input file", required=true),
+      @cmder.positional("output", description="Output file"),
     ]),
   ])
   let schema = app.render_schema()
@@ -57,11 +57,11 @@ test "render_schema includes positionals" {
 
 ///|
 test "render_schema includes examples" {
-  let app = @admiral.cli(name="test", version="0.1.0", description="Test", commands=[
-    @admiral.command(
+  let app = @cmder.cli(name="test", version="0.1.0", description="Test", commands=[
+    @cmder.command(
       name="greet",
       description="Greet",
-      options=[@admiral.string("name", description="Name", required=true)],
+      options=[@cmder.string("name", description="Name", required=true)],
       examples=["test greet --name Alice", "test greet --name Bob"],
     ),
   ])

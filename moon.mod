@@ -1,10 +1,10 @@
-name = "mizchi/admiral"
+name = "hustcer/cmder"
 
 version = "0.1.2"
 
 readme = "README.md"
 
-repository = "https://github.com/mizchi/admiral"
+repository = "https://github.com/hustcer/cmder"
 
 license = "MIT"
 

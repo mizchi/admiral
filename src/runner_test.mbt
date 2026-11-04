@@ -2,16 +2,16 @@
 test "cli creates CliApp and run executes command" {
   let called = Ref(false)
   let captured_name = Ref("")
-  let app = @admiral.cli(
+  let app = @cmder.cli(
     name="test-app",
     version="1.0.0",
     description="Test application",
     commands=[
-      @admiral.command(
+      @cmder.command(
         name="greet",
         description="Greet someone",
         options=[
-          @admiral.string("name", short='n', description="Name", required=true),
+          @cmder.string("name", short='n', description="Name", required=true),
         ],
         run=Some(fn(ctx) {
           called.val = true
@@ -30,11 +30,11 @@ test "cli creates CliApp and run executes command" {
 ///|
 test "cli run with bool flag" {
   let was_verbose = Ref(false)
-  let app = @admiral.cli(name="test-app", version="0.1.0", description="Test", commands=[
-    @admiral.command(
+  let app = @cmder.cli(name="test-app", version="0.1.0", description="Test", commands=[
+    @cmder.command(
       name="build",
       description="Build project",
-      options=[@admiral.bool("verbose", short='v', description="Verbose")],
+      options=[@cmder.bool("verbose", short='v', description="Verbose")],
       run=Some(fn(ctx) { was_verbose.val = ctx.get_bool("verbose") }),
     ),
   ])
@@ -45,12 +45,12 @@ test "cli run with bool flag" {
 ///|
 test "cli run with int option" {
   let port_val = Ref(0)
-  let app = @admiral.cli(name="test-app", version="0.1.0", description="Test", commands=[
-    @admiral.command(
+  let app = @cmder.cli(name="test-app", version="0.1.0", description="Test", commands=[
+    @cmder.command(
       name="serve",
       description="Start server",
       options=[
-        @admiral.int("port", short='p', description="Port", default=Some(3000)),
+        @cmder.int("port", short='p', description="Port", default=Some(3000)),
       ],
       run=Some(fn(ctx) {
         port_val.val = match ctx.get_int("port") {
@@ -67,12 +67,12 @@ test "cli run with int option" {
 ///|
 test "cli run with nested subcommand" {
   let result = Ref("")
-  let app = @admiral.cli(name="test-app", version="0.1.0", description="Test", commands=[
-    @admiral.command(name="db", description="Database commands", subcommands=[
-      @admiral.command(
+  let app = @cmder.cli(name="test-app", version="0.1.0", description="Test", commands=[
+    @cmder.command(name="db", description="Database commands", subcommands=[
+      @cmder.command(
         name="migrate",
         description="Run migrations",
-        options=[@admiral.bool("dry-run", description="Dry run")],
+        options=[@cmder.bool("dry-run", description="Dry run")],
         run=Some(fn(ctx) {
           result.val = if ctx.get_bool("dry-run") { "dry" } else { "real" }
         }),

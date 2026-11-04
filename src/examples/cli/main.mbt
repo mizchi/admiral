@@ -1,22 +1,22 @@
 ///|
 fn main {
-  let app = @admiral.cli(
+  let app = @cmder.cli(
     name="myapp",
     version="0.1.0",
     description="Example CLI with nested subcommands",
     commands=[
-      @admiral.command(
+      @cmder.command(
         name="greet",
         description="Greet someone",
         options=[
-          @admiral.string(
+          @cmder.string(
             "name",
             short='n',
             description="Name to greet",
             required=true,
           ),
-          @admiral.bool("loud", short='l', description="Shout the greeting"),
-          @admiral.int(
+          @cmder.bool("loud", short='l', description="Shout the greeting"),
+          @cmder.int(
             "count",
             short='c',
             description="Repeat count",
@@ -40,63 +40,59 @@ fn main {
           }
         }),
       ),
-      @admiral.command(name="db", description="Database commands", subcommands=[
-        @admiral.command(
-          name="migrate",
-          description="Run database migrations",
-          subcommands=[
-            @admiral.command(
-              name="up",
-              description="Apply pending migrations",
-              options=[
-                @admiral.bool("dry-run", description="Preview without applying"),
-                @admiral.int(
-                  "steps",
-                  short='s',
-                  description="Number of migrations to apply",
-                ),
-              ],
-              examples=[
-                "myapp db migrate up", "myapp db migrate up --dry-run", "myapp db migrate up --steps 5",
-              ],
-              run=Some(fn(ctx) {
-                let dry = ctx.get_bool("dry-run")
-                let steps = ctx.get_int("steps")
-                if dry {
-                  println("[DRY RUN] Would apply migrations")
-                } else {
-                  match steps {
-                    Some(n) => println("Applying \{n} migrations...")
-                    None => println("Applying all pending migrations...")
-                  }
+      @cmder.command(name="db", description="Database commands", subcommands=[
+        @cmder.command(name="migrate", description="Run database migrations", subcommands=[
+          @cmder.command(
+            name="up",
+            description="Apply pending migrations",
+            options=[
+              @cmder.bool("dry-run", description="Preview without applying"),
+              @cmder.int(
+                "steps",
+                short='s',
+                description="Number of migrations to apply",
+              ),
+            ],
+            examples=[
+              "myapp db migrate up", "myapp db migrate up --dry-run", "myapp db migrate up --steps 5",
+            ],
+            run=Some(fn(ctx) {
+              let dry = ctx.get_bool("dry-run")
+              let steps = ctx.get_int("steps")
+              if dry {
+                println("[DRY RUN] Would apply migrations")
+              } else {
+                match steps {
+                  Some(n) => println("Applying \{n} migrations...")
+                  None => println("Applying all pending migrations...")
                 }
-                println("Done.")
-              }),
-            ),
-            @admiral.command(
-              name="down",
-              description="Rollback migrations",
-              options=[
-                @admiral.int(
-                  "steps",
-                  short='s',
-                  description="Number of migrations to rollback",
-                  default=Some(1),
-                ),
-              ],
-              run=Some(fn(ctx) {
-                let steps = ctx.get_int("steps").unwrap_or(1)
-                println("Rolling back \{steps} migration(s)...")
-                println("Done.")
-              }),
-            ),
-          ],
-        ),
-        @admiral.command(
+              }
+              println("Done.")
+            }),
+          ),
+          @cmder.command(
+            name="down",
+            description="Rollback migrations",
+            options=[
+              @cmder.int(
+                "steps",
+                short='s',
+                description="Number of migrations to rollback",
+                default=Some(1),
+              ),
+            ],
+            run=Some(fn(ctx) {
+              let steps = ctx.get_int("steps").unwrap_or(1)
+              println("Rolling back \{steps} migration(s)...")
+              println("Done.")
+            }),
+          ),
+        ]),
+        @cmder.command(
           name="seed",
           description="Seed the database",
           options=[
-            @admiral.string(
+            @cmder.string(
               "file",
               short='f',
               description="Seed file path",

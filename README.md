@@ -16,7 +16,7 @@ Add to `moon.mod` (module dependency):
 
 ```text
 import {
-  "mizchi/admiral@0.1.2",
+  "hustcer/cmder@0.1.2",
 }
 ```
 
@@ -24,28 +24,28 @@ Add to the package's `moon.pkg`:
 
 ```text
 import {
-  "mizchi/admiral",
+  "hustcer/cmder",
 }
 ```
 
-Or run `moon add mizchi/admiral` from the module root.
+Or run `moon add hustcer/cmder` from the module root.
 
 ## Quick Start
 
 ```moonbit
 fn main {
-  let app = @admiral.cli(
+  let app = @cmder.cli(
     name="myapp",
     version="1.0.0",
     description="My CLI tool",
     commands=[
-      @admiral.command(
+      @cmder.command(
         name="greet",
         description="Greet someone",
         options=[
-          @admiral.string("name", short='n', description="Name to greet", required=true),
-          @admiral.bool("verbose", short='v', description="Verbose output"),
-          @admiral.int("count", short='c', description="Repeat count", default=Some(1)),
+          @cmder.string("name", short='n', description="Name to greet", required=true),
+          @cmder.bool("verbose", short='v', description="Verbose output"),
+          @cmder.int("count", short='c', description="Repeat count", default=Some(1)),
         ],
         examples=["myapp greet --name Alice", "myapp greet -n Bob -v -c 3"],
         run=Some(fn(ctx) {
@@ -97,16 +97,16 @@ Three types of options, plus positional arguments:
 
 ```moonbit
 // String option: --name value or -n value
-@admiral.string("name", short='n', description="User name", required=true)
+@cmder.string("name", short='n', description="User name", required=true)
 
 // Bool flag: --verbose or -v
-@admiral.bool("verbose", short='v', description="Verbose output")
+@cmder.bool("verbose", short='v', description="Verbose output")
 
 // Int option: --port 8080 or -p 8080
-@admiral.int("port", short='p', description="Port number", default=Some(3000))
+@cmder.int("port", short='p', description="Port number", default=Some(3000))
 
 // Positional argument
-@admiral.positional("file", description="Input file", required=true)
+@cmder.positional("file", description="Input file", required=true)
 ```
 
 `short` is optional — omit it to only allow the long form (`--name`).
@@ -142,23 +142,23 @@ run=Some(fn(ctx) {
 Commands can nest arbitrarily deep:
 
 ```moonbit
-let app = @admiral.cli(
+let app = @cmder.cli(
   name="myapp",
   commands=[
-    @admiral.command(
+    @cmder.command(
       name="db",
       description="Database commands",
       subcommands=[
-        @admiral.command(
+        @cmder.command(
           name="migrate",
           description="Run migrations",
           subcommands=[
-            @admiral.command(
+            @cmder.command(
               name="up",
               description="Apply pending migrations",
               options=[
-                @admiral.bool("dry-run", description="Preview without applying"),
-                @admiral.int("steps", short='s', description="Number of steps"),
+                @cmder.bool("dry-run", description="Preview without applying"),
+                @cmder.int("steps", short='s', description="Number of steps"),
               ],
               examples=[
                 "myapp db migrate up",
@@ -176,11 +176,11 @@ let app = @admiral.cli(
                 }
               }),
             ),
-            @admiral.command(
+            @cmder.command(
               name="down",
               description="Rollback migrations",
               options=[
-                @admiral.int("steps", short='s', description="Steps to rollback", default=Some(1)),
+                @cmder.int("steps", short='s', description="Steps to rollback", default=Some(1)),
               ],
               run=Some(fn(ctx) {
                 let steps = ctx.get_int("steps").unwrap_or(1)
@@ -189,11 +189,11 @@ let app = @admiral.cli(
             ),
           ],
         ),
-        @admiral.command(
+        @cmder.command(
           name="seed",
           description="Seed the database",
           options=[
-            @admiral.string("file", short='f', description="Seed file", default=Some("seeds/default.sql")),
+            @cmder.string("file", short='f', description="Seed file", default=Some("seeds/default.sql")),
           ],
           run=Some(fn(ctx) {
             let file = ctx.get_string("file").unwrap_or("seeds/default.sql")
@@ -220,11 +220,11 @@ Seeding from: custom.sql
 ### Positional Arguments
 
 ```moonbit
-@admiral.command(
+@cmder.command(
   name="cat",
   description="Concatenate files",
   positionals=[
-    @admiral.positional("files", description="Files to concatenate"),
+    @cmder.positional("files", description="Files to concatenate"),
   ],
   run=Some(fn(ctx) {
     let files = ctx.get_strings("files")
@@ -320,10 +320,10 @@ println(app.render_fish_completion())
 Typical usage — add a `completion` subcommand:
 
 ```moonbit
-@admiral.command(
+@cmder.command(
   name="completion",
   description="Generate shell completion script",
-  options=[@admiral.string("shell", short='s', description="Shell type (bash, zsh, fish)", required=true)],
+  options=[@cmder.string("shell", short='s', description="Shell type (bash, zsh, fish)", required=true)],
   run=Some(fn(ctx) {
     match ctx.get_string("shell") {
       Some("bash") => println(app.render_bash_completion())

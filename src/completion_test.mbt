@@ -1,12 +1,12 @@
 ///|
 test "bash completion contains commands and options" {
-  let app = @admiral.cli(name="myapp", version="0.1.0", description="Test", commands=[
-    @admiral.command(name="greet", description="Greet someone", options=[
-      @admiral.string("name", short='n', description="Name", required=true),
-      @admiral.bool("verbose", short='v', description="Verbose"),
+  let app = @cmder.cli(name="myapp", version="0.1.0", description="Test", commands=[
+    @cmder.command(name="greet", description="Greet someone", options=[
+      @cmder.string("name", short='n', description="Name", required=true),
+      @cmder.bool("verbose", short='v', description="Verbose"),
     ]),
-    @admiral.command(name="db", description="Database", subcommands=[
-      @admiral.command(name="migrate", description="Migrations"),
+    @cmder.command(name="db", description="Database", subcommands=[
+      @cmder.command(name="migrate", description="Migrations"),
     ]),
   ])
   let bash = app.render_bash_completion()
@@ -21,9 +21,9 @@ test "bash completion contains commands and options" {
 
 ///|
 test "zsh completion contains commands and options" {
-  let app = @admiral.cli(name="myapp", version="0.1.0", description="Test", commands=[
-    @admiral.command(name="greet", description="Greet someone", options=[
-      @admiral.string("name", short='n', description="Name", required=true),
+  let app = @cmder.cli(name="myapp", version="0.1.0", description="Test", commands=[
+    @cmder.command(name="greet", description="Greet someone", options=[
+      @cmder.string("name", short='n', description="Name", required=true),
     ]),
   ])
   let zsh = app.render_zsh_completion()
@@ -34,14 +34,14 @@ test "zsh completion contains commands and options" {
 
 ///|
 test "fish completion contains commands and options" {
-  let app = @admiral.cli(name="myapp", version="0.1.0", description="Test", commands=[
-    @admiral.command(name="greet", description="Greet someone", options=[
-      @admiral.string("name", short='n', description="Name", required=true),
-      @admiral.bool("verbose", short='v', description="Verbose"),
+  let app = @cmder.cli(name="myapp", version="0.1.0", description="Test", commands=[
+    @cmder.command(name="greet", description="Greet someone", options=[
+      @cmder.string("name", short='n', description="Name", required=true),
+      @cmder.bool("verbose", short='v', description="Verbose"),
     ]),
-    @admiral.command(name="db", description="Database", subcommands=[
-      @admiral.command(name="migrate", description="Migrations", options=[
-        @admiral.bool("dry-run", description="Dry run"),
+    @cmder.command(name="db", description="Database", subcommands=[
+      @cmder.command(name="migrate", description="Migrations", options=[
+        @cmder.bool("dry-run", description="Dry run"),
       ]),
     ]),
   ])

@@ -1,8 +1,8 @@
 ///|
 test "OptionDef holds string option metadata" {
-  let opt : @admiral.OptionDef = {
+  let opt : @cmder.OptionDef = {
     name: "output",
-    type_: @admiral.StringOpt,
+    type_: @cmder.StringOpt,
     short: 'o',
     description: "Output path",
     required: true,
@@ -15,7 +15,7 @@ test "OptionDef holds string option metadata" {
 
 ///|
 test "CommandDef holds subcommands" {
-  let sub : @admiral.CommandDef = {
+  let sub : @cmder.CommandDef = {
     name: "sub",
     description: "A subcommand",
     options: [],
@@ -24,7 +24,7 @@ test "CommandDef holds subcommands" {
     subcommands: [],
     run: Some(fn(_ctx) { () }),
   }
-  let cmd : @admiral.CommandDef = {
+  let cmd : @cmder.CommandDef = {
     name: "app",
     description: "An app",
     options: [],

@@ -1,6 +1,6 @@
 ///|
 test "string() creates StringOpt OptionDef" {
-  let opt = @admiral.string(
+  let opt = @cmder.string(
     "name",
     short='n',
     description="User name",
@@ -20,7 +20,7 @@ test "string() creates StringOpt OptionDef" {
 
 ///|
 test "string() with default value" {
-  let opt = @admiral.string(
+  let opt = @cmder.string(
     "output",
     description="Output path",
     default=Some("stdout"),
@@ -31,14 +31,14 @@ test "string() with default value" {
 
 ///|
 test "bool() creates BoolOpt OptionDef" {
-  let opt = @admiral.bool("verbose", short='v', description="Verbose output")
+  let opt = @cmder.bool("verbose", short='v', description="Verbose output")
   inspect(opt.type_, content="BoolOpt")
   inspect(opt.required, content="false")
 }
 
 ///|
 test "int() creates IntOpt OptionDef" {
-  let opt = @admiral.int(
+  let opt = @cmder.int(
     "count",
     short='c',
     description="Repeat count",
@@ -50,7 +50,7 @@ test "int() creates IntOpt OptionDef" {
 
 ///|
 test "int() required" {
-  let opt = @admiral.int(
+  let opt = @cmder.int(
     "port",
     short='p',
     description="Port number",
